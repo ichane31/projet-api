@@ -2,6 +2,7 @@ import { Expose } from "class-transformer";
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationCount } from "typeorm";
 import { Category } from "./category";
 import { Comment } from "./comment";
+import { Note } from "./note";
 import { User } from "./user";
 
 @Entity()
@@ -68,6 +69,9 @@ export class Projet extends BaseEntity {
         name: 'user_id'
     })
     author: User
+
+    @OneToMany(() => Note, (note) => note.projet)
+    notes: Note[];
 
     @ManyToMany(
         type => User,

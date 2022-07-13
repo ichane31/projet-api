@@ -9,13 +9,14 @@ import { Chapter } from '../model/chapter';
 import { Step } from '../model/step';
 import { Projet } from '../model/projet';
 import { Comment } from '../model/comment';
+import { Note } from '../model/note';
 
 
 const PostgresDataSource = new DataSource({
 	name: 'default',
 	type: 'postgres',
 	url: config.DB_URL,
-	entities: [User, Lab, Category, Course, Chapter, Step, Projet,Comment],
+	entities: [User, Lab, Category, Course, Chapter, Step, Projet,Comment,Note],
 	synchronize: true,
 	ssl: config.NODE_ENV == 'development' ? undefined : {
 		rejectUnauthorized: false

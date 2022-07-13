@@ -43,17 +43,17 @@ export class CommentController {
         res.status(201).json({ ...newComment, projet: comment.projet.title });
     }
 
-    // @ApiOperation({ description: 'Get details of a course' })
-    // @ApiResponse({
-    //     status: 404,
-    //     description: 'Course not found',
-    // })
-    // @Get('/:courseId')
-    // public async courseById(req: Request, res: Response) {
-    //     const courseId = Number(req.params.courseId);
+    @ApiOperation({ description: 'Get details of a comment' })
+    @ApiResponse({
+        status: 404,
+        description: 'Comment not found',
+    })
+    @Get('/:commentId')
+    public async commentById(req: Request, res: Response) {
+        const commentId = Number(req.params.commentId);
 
-    //     res.status(200).json({ ...await courseService.getById(courseId) });
-    // }
+        res.status(200).json({ ...await commentService.getById(commentId) });
+    }
 
     // @ApiOperation({ description: 'Modify a course' })
     // @ApiBody({

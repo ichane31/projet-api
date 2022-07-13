@@ -2,7 +2,7 @@ import { DeleteResult, Repository } from 'typeorm';
 import { PostgresDataSource } from '../config/datasource.config';
 import { Comment } from '../model/comment';
 import {  Injectable, NotFoundException } from '@nestjs/common';
-import  projetService, { ProjetService }  from './projet.service';
+import  projetService from './projet.service';
 // import  userService  from './user.service';
 
 @Injectable()
@@ -29,7 +29,8 @@ export class CommentService {
     //   }
 
     public async createComment(comment: Comment ): Promise<Comment> { 
-        return this.commentRepository.save(comment);
+        const createdComment =  this.commentRepository.save(comment);
+        return this.getById((await createdComment).id)
         
     }
     
