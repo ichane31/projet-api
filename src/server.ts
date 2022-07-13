@@ -55,7 +55,7 @@ export class App {
         // this._app.use('/api/v1/lab', labRouter.router);
         // this._app.use('/api/v1/step', stepRouter.router);
         this._app.use('/api/v1/projet', projetRouter.router);
-        this._app.use('/api/v1/comment', commentRouter.router);
+        // this._app.use('/api/v1/comment', commentRouter.router);
 
         this._app.get('/', (req, res) => res.send('welcome to lablib :) <a href="/api/v1/category">start from here</a>  <a href="/docs/v1">read the documentation</a> '));
     }
