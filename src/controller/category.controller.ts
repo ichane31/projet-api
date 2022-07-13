@@ -7,6 +7,7 @@ import { Controller, Get, Post, Body, Delete, Put } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiBody, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PostCategoryDTO } from '../dto/post.category.dto'
 import { NotFoundException } from '../error/NotFoundException.error';
+import projetService from '../service/projet.service';
 
 @ApiTags('Category')
 @Controller('api/v1/category')
@@ -150,6 +151,29 @@ export class CategoryController {
 
         let courses = await courseService.getByCategory(Number(categoryId));
         res.status(200).json(courses);
+    }
+
+    @ApiOperation({ description: 'Get a list of projet for a given category' })
+    @ApiOkResponse(
+        {
+            description: 'projets list',
+            schema: {
+                type: 'Projet[]',
+                // example: [{ id: 3, name: "ExpressJS", description: 'Course\'s description' }]
+            }
+        }
+    )
+    @Get('/:categoryId/Projetlist')
+    public async allProjetsByCategory(req: Request, res: Response) {
+        const { categoryId } = req.params;
+        const category = await categoryService.getById(Number(categoryId));
+
+        if (!category) {
+            throw new NotFoundException('Category not found');
+        }
+
+        let projets = await projetService.getByCategory(Number(categoryId));
+        res.status(200).json(projets);
     }
 }
 

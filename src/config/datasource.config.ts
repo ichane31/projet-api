@@ -7,13 +7,15 @@ import { Category } from '../model/category';
 import { Course } from '../model/course';
 import { Chapter } from '../model/chapter';
 import { Step } from '../model/step';
+import { Projet } from '../model/projet';
+import { Comment } from '../model/comment';
 
 
 const PostgresDataSource = new DataSource({
 	name: 'default',
 	type: 'postgres',
 	url: config.DB_URL,
-	entities: [User, Lab, Category, Course, Chapter, Step],
+	entities: [User, Lab, Category, Course, Chapter, Step, Projet,Comment],
 	synchronize: true,
 	ssl: config.NODE_ENV == 'development' ? undefined : {
 		rejectUnauthorized: false

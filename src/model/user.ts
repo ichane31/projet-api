@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, ManyToMany } from "typeorm";
 import { Role } from '../types/role.enum';
 import { Lab } from "./lab";
+import { Projet } from "./projet";
 @Entity()
 export class User extends BaseEntity {
     @PrimaryGeneratedColumn()
@@ -26,5 +27,18 @@ export class User extends BaseEntity {
         lab => lab.user
     )
     labs: Lab[]
+
+    @OneToMany(
+        () => Projet,
+        projet => projet.author
+    )
+    projets: Projet[]
+
+    @ManyToMany(
+        type => Projet,
+        projet => projet.favoritedBy,
+      )
+      favorites: Projet[];
+
 
 }

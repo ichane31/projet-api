@@ -16,6 +16,7 @@ class CategoryRouter {
         this.router.put('/:categoryId', categoryController.updateCategory);
         this.router.delete('/:categoryId', categoryController.deleteCategory);
         this.router.get('/:categoryId/list', categoryController.allCoursesByCategory);
+        this.router.get('/:categoryId/Projetlist', categoryController.allProjetsByCategory);
     }
 
 }

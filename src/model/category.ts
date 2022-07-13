@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany } from "typeorm";
 import { Course } from "./course";
+import { Projet } from "./projet";
 @Entity()
 export class Category extends BaseEntity {
     @PrimaryGeneratedColumn()
@@ -20,4 +21,10 @@ export class Category extends BaseEntity {
         course => course.category
     )
     courses: Course[]
+
+    @OneToMany(
+        () => Projet,
+        projet => projet.category
+    )
+    projets: Projet[]
 }

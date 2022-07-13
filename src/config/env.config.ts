@@ -9,8 +9,10 @@ export const config = {
 	CORS_ORIGIN: 'http://localhost:' + (process.env.PORT || 3000),
 	COOKIE_DOMAIN: 'localhost',
 	DB_URL: process.env.DATABASE_URL,
-	DB_PASSWORD: 'MarwaHind123',
+	DB_PASSWORD: 'postgres',
 	DB_NAME: 'LPDB',
 	DB_USER: 'postgres',
-	DB_PORT: 5432
+	DB_PORT: 5000
 };
+
+// MarwaHind123
