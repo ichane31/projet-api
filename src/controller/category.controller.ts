@@ -159,7 +159,7 @@ export class CategoryController {
             description: 'projets list',
             schema: {
                 type: 'Projet[]',
-                // example: [{ id: 3, name: "ExpressJS", description: 'Course\'s description' }]
+                example: [{ id: 3, title: "lablib-api", description: 'plateforme d\'apprentissage',resume:'resume.docs',rapport:'rapport.docs',presentation:'presentation.ppt' }]
             }
         }
     )

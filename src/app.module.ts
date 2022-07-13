@@ -13,8 +13,8 @@ import { ProjetService } from './service/projet.service';
 import { StepService } from './service/step.service';
 
 @Module({
-  controllers: [CategoryController, CourseController, ChapterController, LabController, StepController,ProjetController],
-  providers: [CategoryService, CourseService, ChapterService, LabService, StepService,ProjetService],
+  controllers: [CategoryController/*, CourseController, ChapterController, LabController, StepController*/,ProjetController],
+  providers: [CategoryService/*, CourseService, ChapterService, LabService, StepService*/,ProjetService],
 })
 
 export class AppModule { }

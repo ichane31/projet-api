@@ -10,7 +10,7 @@ import { PostCommentDTO } from '../dto/post.comment.dto';
 import userService from '../service/user.service';
 
 
-@ApiTags('Course')
+@ApiTags('Comment')
 @Controller('api/v1/course')
 export class CommentController {
     

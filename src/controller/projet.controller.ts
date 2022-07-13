@@ -10,7 +10,7 @@ import { Projet } from '../model/projet';
 import { PutProjetDTO } from '../dto/put.projet.dto';
 import userService from '../service/user.service';
 
-@ApiTags('Course')
+@ApiTags('Projet')
 @Controller('api/v1/projet')
 export class ProjetController {
     @ApiOperation({description: 'Get list of projet'})
@@ -107,6 +107,10 @@ export class ProjetController {
     @ApiResponse({
         status: 404,
         description: 'Projet not found',
+        schema: {
+            type: 'empty object',
+            example: {}
+        }
     })
     @Delete('/:projetId')
     public async deleteProjet(req: Request, res: Response) {
@@ -124,6 +128,11 @@ export class ProjetController {
     }
 
     @ApiOperation({description: 'count projet'})
+    @ApiResponse({
+        schema: {
+            example: 2
+        }
+    })
     @Get('/count')
     async getCount() {
     try {
@@ -134,6 +143,11 @@ export class ProjetController {
   }
 
     @ApiOperation({description:'count projet by category'})
+    @ApiResponse({
+        schema: {
+            example: 2
+        }
+    })
     @Get('category/:categoryId/count')
     async getCountByCategory(@Param('categoryId') categoryId: number) {
     try {
@@ -150,7 +164,7 @@ export class ProjetController {
           description: 'Projets list',
           schema: {
               type: 'Projet[]',
-            //   example: [{ id: 3, name: "ExpressJS", description: 'Course\'s description' }]
+            example: [{ id: 3, title: "lablib-api", description: 'plateforme d\'apprentissage',resume:'resume.docs',rapport:'rapport.docs',presentation:'presentation.ppt' }]
           }
       }
   )
