@@ -11,7 +11,7 @@ import userService from '../service/user.service';
 
 
 @ApiTags('Comment')
-@Controller('api/v1/course')
+@Controller('api/v1/comment')
 export class CommentController {
     
     @ApiOperation({ description: 'Create a new comment' })
