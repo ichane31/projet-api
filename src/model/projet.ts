@@ -1,5 +1,5 @@
 import { Expose } from "class-transformer";
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationCount } from "typeorm";
+import { BaseEntity, BeforeUpdate, Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationCount } from "typeorm";
 import { Category } from "./category";
 import { Comment } from "./comment";
 import { Note } from "./note";
@@ -45,6 +45,11 @@ export class Projet extends BaseEntity {
 
     @CreateDateColumn({ type: 'timestamp' })
     updatedAt: Date
+
+    @BeforeUpdate()
+    updateTimestamp() {
+      this.updatedAt = new Date();
+    }
 
     @ManyToOne(
         () => Category,

@@ -80,7 +80,7 @@ export class ProjetController {
     public async updateProjet(req: Request, res: Response) {
         const {title, description,resume,rapport,image,presentation,videoDemo,codeSource,prix } = req.body;
 
-        const { projetId } = req.params;
+        const { projetId} = req.params;
         const projet = await projetService.getById(Number(projetId));
 
         if (!projet) {

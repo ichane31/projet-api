@@ -93,7 +93,7 @@ export class ProjetService {
     public async getByCategory(categoryId: number , page = 1, take = 25): Promise<Projet[]> {
         return this.projetRepository.createQueryBuilder()
             .leftJoin("Projet.category", "Category")
-            .leftJoinAndSelect('Projet.comments','Comment','Comment.projet = Projet.id')
+            // .leftJoinAndSelect('Projet.comments','Comment','Comment.projet.id = Projet.id')
             .where("Category.id = :categoryId", { categoryId })
             .skip((page - 1) * take)
             .take(take)

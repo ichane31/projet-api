@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { BadRequestException } from '../error/BadRequestException.error';
-import { Controller, Get, Post, Body, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, Put, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { NotFoundException } from '../error/NotFoundException.error';
 import projetService from '../service/projet.service';
@@ -35,7 +35,7 @@ export class CommentController {
         let $user = await userService.getByEmail(userEmail);
         const comment = new Comment();
 
-        comment.author = $user.firstName;
+        comment.author = $user;
         comment.body = body;
         comment.projet = $projet;
         const newComment = await commentService.createComment(comment);
@@ -90,12 +90,19 @@ export class CommentController {
     })
     @Delete('/:commentId')
     public async deleteComment(req: Request, res: Response) {
-        const { commentsId } = req.params;
+        const { commentsId , userId} = req.params;
 
         const comment = await commentService.getById(Number(commentsId));
 
+
         if (!comment) {
             throw new NotFoundException('Comment not found');
+        }
+        
+        if(comment.author.id !== Number(userId)) {
+            throw new HttpException('You do not own this comment',
+            HttpStatus.UNAUTHORIZED,)
+
         }
 
         await commentService.deleteCommentById(comment.id);

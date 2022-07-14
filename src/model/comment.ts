@@ -13,8 +13,8 @@ export class Comment extends BaseEntity {
     @Column({type:"varchar"})
     body:string
 
-    @Column({ default: 'n/a' })
-    author?: string;
+    // @Column({ default: 'n/a' })
+    // author?: string;
 
     // @Column({ default: 0 })
     // likes?: number;
@@ -31,9 +31,9 @@ export class Comment extends BaseEntity {
     @ManyToOne(type => Projet, projet => projet.comments)
     projet: Projet
 
-    // @ManyToOne(() => User ,user =>user.comments ) 
-    //  @JoinColumn({ name: 'user_id'})
-    // user: User;
+    @ManyToOne(() => User ,user =>user.comments ) 
+    @JoinColumn({ name: 'user_id'})
+    author: User;
 
 
 }

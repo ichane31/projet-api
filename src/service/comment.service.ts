@@ -14,10 +14,12 @@ export class CommentService {
         this.commentRepository = PostgresDataSource.getRepository(Comment);
     }
 
-    public async getComments(projetId: number): Promise<Comment[]> {
+    public async getComments(projetId: number, page: number = 1): Promise<Comment[]> {
         return this.commentRepository.createQueryBuilder()
             .leftJoin("Comment.projet", "Projet")
             .where("Projet.id = :projetId", { projetId })
+            .take(25)
+            .skip((page - 1) * 25)
             .getMany();
     }
 
@@ -36,7 +38,7 @@ export class CommentService {
     
     public async getById(id: number): Promise<Comment | null> {
         return this.commentRepository.findOne( { where: { id }, 
-            relations:['projet']},
+            relations:['projet','author']},
             );
     }
 
