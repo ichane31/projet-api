@@ -15,8 +15,8 @@ import { ProjetService } from './service/projet.service';
 import { StepService } from './service/step.service';
 
 @Module({
-  controllers: [CategoryController, CourseController/*, ChapterController, LabController, StepController*/,ProjetController,CommentController],
-  providers: [CategoryService, CourseService /*, ChapterService, LabService, StepService*/,ProjetService,CommentService],
+  controllers: [CategoryController/*, CourseController, ChapterController, LabController, StepController*/,ProjetController,CommentController],
+  providers: [CategoryService/*, CourseService, ChapterService, LabService, StepService*/,ProjetService,CommentService],
 })
 
 export class AppModule { }
