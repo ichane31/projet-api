@@ -23,6 +23,10 @@ export class ProjetController {
     @ApiBody({
         // type: PostProjetDTO,
         description: 'infos about the new projet',
+        schema: {
+            type: 'Projet',
+            example: { id: 5, title: "plateforme", description: 'platforme apprentissage', category:'programmation' }
+        }
     })
     @Post('/')
     public async createProjet(req: Request, res: Response) {
