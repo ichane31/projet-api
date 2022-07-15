@@ -18,6 +18,6 @@ import {
     @Column({ length: 256 })
     body: string;
   
-    @ManyToOne(type => Comment, comment => comment.replies)
-    comment: Comment;
+    // @ManyToOne(type => Comment, comment => comment.replies)
+    // comment: Comment;
   }

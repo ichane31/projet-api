@@ -36,9 +36,9 @@ export class Comment extends BaseEntity {
     @JoinColumn({ name: 'user_id'})
     author: User;
 
-    @OneToMany(type => Reply, reply => reply.comment)
-    @JoinColumn()
-    replies: Reply[];
+    // @OneToMany(type => Reply, reply => reply.comment)
+    // @JoinColumn()
+    // replies: Reply[];
 
 
 }
