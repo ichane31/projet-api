@@ -61,20 +61,6 @@ export class ProjetService {
 
 
     public async createProj(projet: Projet /*, userEmail:string*/): Promise<Projet> {
-        // const {title, description,resume,rapport,image,presentation,videoDemo,codeSource,prix} = projet
-        //     const proj = new Projet()
-        //     proj.title = title
-        //     proj.description = description
-        //     proj.resume = resume
-        //     proj.rapport = rapport
-        //     proj.image = image
-        //     proj.presentation = presentation
-        //     proj.videoDemo = videoDemo
-        //     proj.codeSource = codeSource
-        //     proj.prix = prix
-        //     proj.author = user
-        // let $author = await userService.getByEmail(userEmail)
-        // projet.author = $author
            
         return this.projetRepository.save(projet);
         
