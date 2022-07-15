@@ -20,14 +20,6 @@ export class ProjetController {
     }
 
     @ApiOperation({ description: 'Create a new projet' })
-    @ApiBody({
-        // type: PostProjetDTO,
-        description: 'infos about the new projet',
-        schema: {
-            type: 'Projet',
-            example: { id: 5, title: "plateforme", description: 'platforme apprentissage', category:'programmation' }
-        }
-    })
     @Post('/')
     public async createProjet(req: Request, res: Response) {
         const {title, description,resume,rapport,image,presentation,videoDemo,codeSource,prix , category} = req.body
