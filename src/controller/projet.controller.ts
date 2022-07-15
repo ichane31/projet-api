@@ -21,7 +21,7 @@ export class ProjetController {
 
     @ApiOperation({ description: 'Create a new projet' })
     @ApiBody({
-        type: Projet,
+        type: PostProjetDTO,
         description: 'infos about the new projet'
     })
     @Post('/')
