@@ -21,14 +21,14 @@ export class ProjetController {
 
     @ApiOperation({ description: 'Create a new projet' })
     @ApiBody({
-        type: PostProjetDTO,
+        // type: PostProjetDTO,
         description: 'infos about the new projet',
     })
     @Post('/')
     public async createProjet(req: Request, res: Response) {
-        const {name,title, description,resume,rapport,image,presentation,videoDemo,codeSource,prix , category} = req.body
-        const {userEmail} = req.params
-        if (!category || !name) {
+        const {title, description,resume,rapport,image,presentation,videoDemo,codeSource,prix , category} = req.body
+        // const {userEmail} = req.body
+        if (!category ) {
             throw new BadRequestException('Missing required fields');
         }
 
@@ -49,7 +49,7 @@ export class ProjetController {
         proj.prix = prix
         proj.category = $category
 
-        const newProjet = await projetService.createProj(proj,userEmail);
+        const newProjet = await projetService.createProj(proj/*,userEmail*/);
         res.status(201).json({ ...newProjet, category: proj.category.name });
 
 
@@ -80,8 +80,8 @@ export class ProjetController {
     public async updateProjet(req: Request, res: Response) {
         const {title, description,resume,rapport,image,presentation,videoDemo,codeSource,prix } = req.body;
 
-        const { projetId} = req.params;
-        const projet = await projetService.getById(Number(projetId));
+        const projetId = Number(req.params.projetId);
+        const projet = await projetService.getById(projetId);
 
         if (!projet) {
             throw new NotFoundException('Projet not found');
