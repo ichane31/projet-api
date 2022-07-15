@@ -20,6 +20,10 @@ export class ProjetController {
     }
 
     @ApiOperation({ description: 'Create a new projet' })
+    @ApiBody({
+        type: Projet,
+        description: 'infos about the new projet'
+    })
     @Post('/')
     public async createProjet(req: Request, res: Response) {
         const {title, description,resume,rapport,image,presentation,videoDemo,codeSource,prix , category} = req.body
