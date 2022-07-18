@@ -28,7 +28,7 @@ export class UserController {
 
 	@Post('/')
 	public async create(req: Request, res: Response) {
-		const { email, password, firstName, lastName } = req.body;
+		const { email, password, firstName, lastName,image } = req.body;
 
 		if (!email || !password || !firstName || !lastName) {
 			throw new BadRequestException('Missing required fields');
