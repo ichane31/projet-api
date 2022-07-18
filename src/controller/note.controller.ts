@@ -18,7 +18,7 @@ export class NoteController {
     @ApiOperation({ description: 'add a new note' })
     @ApiBody({
         type: PostNoteDTO,
-        description: 'infos about the new comment',
+        description: 'infos about the new note',
     })
     @Post('/:projetId')
     public async addNote(req: Request, res: Response) {

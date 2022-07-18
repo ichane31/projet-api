@@ -17,8 +17,8 @@ export class NoteService {
     }
 
     public async createNote(note: Note ): Promise<Note> { 
-        const createdComment =  this.noteRepository.save(note);
-        return this.getById((await createdComment).id)
+        const createdNote =  this.noteRepository.save(note);
+        return this.getById((await createdNote).id)
         
     }
 
@@ -26,7 +26,7 @@ export class NoteService {
         return this.noteRepository.findOne({ where: { id } ,
         relations : ['project','user']});
     }
-    
+
     public async deleteNoteById(id: number/*, user: User*/): Promise<{ message: string }> {
         const comment = await this.noteRepository.delete(id/*,user.id*/ )
 
