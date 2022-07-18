@@ -59,22 +59,22 @@ export class CommentService {
     }
 
     
-    async createReply(reply: Comment, comment: Comment,user:User): Promise<Comment> {
+    async createReply(reply: Comment, comment: Comment/*,user:User*/): Promise<Comment> {
         // const comment = await this.commentRepository.findOne({where:{id:commentId}});
         // const user = await this.userRepository.findOne({where:{id:userId}});
         const createdReply =  this.commentRepository.create({...reply,
-        author: user});
+        /*author: user*/});
         createdReply.commentParent = comment;
         await this.commentRepository.save(createdReply);
         return this.getById(createdReply.id)
     }
 
-    async replyToComment(parentId: number,userId: number,reply:Comment): Promise<Comment> { 
+    async replyToComment(parentId: number/*,userId: number*/,reply:Comment): Promise<Comment> { 
         try {
             // Get comment to reply to
             const commentParent = await this.commentRepository
               .createQueryBuilder()
-              .leftJoinAndSelect('Comment.replies', 'Comment')
+              .leftJoin('Comment.replies', 'Comment')
               .where('commentParent.id = :id', { id: parentId })
               .getOne();
 
@@ -82,9 +82,9 @@ export class CommentService {
                 throw new NotFoundException('Cannot find comment ' + parentId);
             }
             //Get user 
-            const user = await userService.getById(userId);
+            // const user = await userService.getById(userId);
             // // insert new reply and return reply id
-            const result = await this.createReply(reply,commentParent,user)
+            const result = await this.createReply(reply,commentParent/*,user*/)
             // // return new reply and add to post
              const replyComment = await this.getById(result.id);
             commentParent.replies = [...commentParent.replies, replyComment];

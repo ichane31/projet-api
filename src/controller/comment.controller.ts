@@ -148,7 +148,7 @@ export class CommentController {
     public async replyToComment(req: Request, res: Response) {
         const { body } = req.body;
         const parentId /*, userEmail*/ = Number(req.params.commentId);
-        const userId = req.currentUser.userId
+        // const userId = req.currentUser.userId
 
         if (!parentId /*|| !userId*/) {
             throw new BadRequestException('Missing required fields');
@@ -159,7 +159,7 @@ export class CommentController {
         // comment.author = $user;
         reply.body = body;
     
-        return await commentService.replyToComment(parentId,userId,reply);
+        return await commentService.replyToComment(parentId/*,userId*/,reply);
 
     }
 
