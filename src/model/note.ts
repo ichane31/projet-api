@@ -1,12 +1,13 @@
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Projet } from "./projet";
+import { User } from "./user";
 @Entity()
 export class Note  extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number
 
     @Column()
-    note: number;
+    value: number;
 
     @CreateDateColumn()
     createdAt: Date;
@@ -17,4 +18,6 @@ export class Note  extends BaseEntity {
     @ManyToOne(() => Projet, projet => projet.id)
     projet: Projet;
     
+    @ManyToOne(() => User)
+    user: User;
 }

@@ -10,12 +10,13 @@ class CommentRouter {
     }
 
     private routes() {
-        // this.router.get('/', commentController.getCommentsByProjet);
+        
         this.router.post('/', commentController.createComment);
         this.router.get('/:commentId', commentController.commentById);
-        // this.router.put('/:commentId', commentController.updateLab);
+        this.router.put('/:commentId', commentController.updateComment);
         this.router.delete('/:commentId', commentController.deleteComment);
         this.router.get('/:projetId/list',commentController.getCommentsByProjet);
+        this.router.post('/:commentId', commentController.replyToComment);
     }
 
 }

@@ -8,6 +8,7 @@ import commentService from '../service/comment.service';
 import { Comment } from '../model/comment';
 import { PostCommentDTO } from '../dto/post.comment.dto';
 import userService from '../service/user.service';
+import { PutCommentDTO } from '../dto/put.comment.dto';
 
 
 @ApiTags('Comment')
@@ -22,9 +23,9 @@ export class CommentController {
     @Post('/')
     public async createComment(req: Request, res: Response) {
         const { body } = req.body;
-        const {projetId , userEmail} = req.params
+        const {projetId /*, userEmail*/} = req.body
 
-        if (!projetId || !userEmail) {
+        if (!projetId || !body/*|| !userEmail*/) {
             throw new BadRequestException('Missing required fields');
         }
 
@@ -32,10 +33,10 @@ export class CommentController {
         if (!$projet) {
             throw new NotFoundException('Cannot find projet ' + projetId);
         }
-        let $user = await userService.getByEmail(userEmail);
+        // let $user = await userService.getByEmail(userEmail);
         const comment = new Comment();
 
-        comment.author = $user;
+        // comment.author = $user;
         comment.body = body;
         comment.projet = $projet;
         const newComment = await commentService.createComment(comment);
@@ -50,38 +51,48 @@ export class CommentController {
     })
     @Get('/:commentId')
     public async commentById(req: Request, res: Response) {
-        const commentId = Number(req.params.commentId);
+        const commentId = Number(req.params.id);
+        const comment = await commentService.getById(commentId);
 
-        res.status(200).json({ ...await commentService.getById(commentId) });
+        if (!comment) {
+            throw new NotFoundException('Comment not found');
+        }
+
+        res.status(200).json({ ...comment });
     }
 
-    // @ApiOperation({ description: 'Modify a course' })
-    // @ApiBody({
-    //     type: PutCourseDTO,
-    //     description: 'infos to be updated',
-    // })
-    // @ApiResponse({
-    //     status: 404,
-    //     description: 'Course not found',
-    // })
-    // @Put('/:commentId')
-    // public async updateCourse(req: Request, res: Response) {
-    //     const { body} = req.body;
+    @ApiOperation({ description: 'Modify a comment' })
+    @ApiBody({
+        type: PutCommentDTO,
+        description: 'infos to be updated',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'Comment not found',
+    })
+    @Put('/:commentId')
+    public async updateComment(req: Request, res: Response) {
+        const { body} = req.body;
 
-    //     const { commentId } = req.params;
-    //     const comment = await commentService.getById(Number(commentId));
+        const { commentId , userId } = req.params;
+        const comment = await commentService.getById(Number(commentId));
 
-    //     if (!comment) {
-    //         throw new NotFoundException('Comment not found');
-    //     }
+        if (!comment) {
+            throw new NotFoundException('Comment not found');
+        }
 
-    //     comment.body = body || comment.body;
-    //     comment.name = name || course.name;
+    if(comment.author.id !== Number(userId)) {
+        throw new HttpException('You do not own this comment',
+        HttpStatus.UNAUTHORIZED,)
 
-    //     const updatedComment = await commentService.update(Number(commentId), course);
+    }
 
-    //     return res.status(200).json({ ...updatedComment });
-    // }
+        comment.body = body || comment.body;
+
+        const updatedComment = await commentService.updateComment(Number(commentId), comment);
+
+        return res.status(200).json({ ...updatedComment });
+    }
 
     @ApiOperation({ description: 'Delete a comment from the database.' })
     @ApiResponse({
@@ -90,7 +101,8 @@ export class CommentController {
     })
     @Delete('/:commentId')
     public async deleteComment(req: Request, res: Response) {
-        const { commentsId , userId} = req.params;
+        const { commentsId } = req.params;
+        const userId = req.currentUser.userId;
 
         const comment = await commentService.getById(Number(commentsId));
 
@@ -125,6 +137,30 @@ export class CommentController {
 
         let comments = await commentService.getComments(Number(projetId));
         res.status(200).json(comments);
+    }
+
+    @ApiOperation({ description: 'reply on comment' })
+    @ApiBody({
+        type: PostCommentDTO,
+        description: 'infos about the new reply comment',
+    })
+    @Post('/:commentId')
+    public async replyToComment(req: Request, res: Response) {
+        const { body } = req.body;
+        const parentId /*, userEmail*/ = Number(req.params.commentId);
+        const userId = req.currentUser.userId
+
+        if (!parentId /*|| !userId*/) {
+            throw new BadRequestException('Missing required fields');
+        }
+
+        const reply = new Comment();
+
+        // comment.author = $user;
+        reply.body = body;
+    
+        return await commentService.replyToComment(parentId,userId,reply);
+
     }
 
 }

@@ -3,6 +3,7 @@ import { Role } from '../types/role.enum';
 import { Lab } from "./lab";
 import { Projet } from "./projet";
 import { Comment } from "./comment";
+import { Note } from "./note";
 @Entity()
 export class User extends BaseEntity {
     @PrimaryGeneratedColumn()
@@ -35,11 +36,15 @@ export class User extends BaseEntity {
     )
     projets: Projet[]
 
+    @OneToMany(() => Note, (note) => note.user)
+    notes: Note[];
+
     @OneToMany(
         () => Comment,
         comment => comment.author
     )
     comments: Comment[]
+
 
     @ManyToMany(
         type => Projet,

@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { PostgresDataSource } from '../config/datasource.config';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Projet } from '../model/projet';
-import { User } from '../model/user';
+import { User} from '../model/user';
 import { Category } from '../model/category';
 import userService from './user.service';
 
@@ -20,6 +20,7 @@ export class ProjetService {
       }
 
     public async update(projetId: number, projet: Projet) {
+        
         return this.projetRepository.save({ ...projet, id: projetId });
     }
     public async getAllProjet(page = 1, take = 20): Promise<Projet[]> {
@@ -42,7 +43,7 @@ export class ProjetService {
     async getProjetsCountByCategory(category: Category ): Promise<number> {
         const ProjetsCount = await this.projetRepository
           .createQueryBuilder('projet')
-          .innerJoin('projet.category', 'category', 'category.id = :catId', { catId: category.id })
+          .innerJoin('Projet.category', 'category', 'category.id = :catId', { catId: category.id })
           .getCount();
         return ProjetsCount;
       }
@@ -59,6 +60,9 @@ export class ProjetService {
         return this.projetRepository.find({where:{title}})
     }
 
+    public ensureOwnership(user: User, projet: Projet): boolean {
+        return projet.author.id === user.id;
+      }
 
     public async createProj(projet: Projet /*, userEmail:string*/): Promise<Projet> {
            
@@ -78,8 +82,9 @@ export class ProjetService {
     
     public async getByCategory(categoryId: number , page = 1, take = 25): Promise<Projet[]> {
         return this.projetRepository.createQueryBuilder()
-            .leftJoin("Projet.category", "Category")
+            .leftJoinAndSelect("Projet.category", "Category")
             // .leftJoinAndSelect('Projet.comments','Comment','Comment.projet.id = Projet.id')
+            .leftJoinAndSelect("Projet.author","User")
             .where("Category.id = :categoryId", { categoryId })
             .skip((page - 1) * take)
             .take(take)
@@ -89,7 +94,7 @@ export class ProjetService {
 
     public async getProjetByUser(userId: number , page = 1, take = 25): Promise<Projet[]> {
         return this.projetRepository.createQueryBuilder()
-            .innerJoin("Projet.user", "User")
+            .innerJoinAndSelect("Projet.user", "User")
             // .leftJoinAndSelect('Projet.comments','Comment')
             .leftJoinAndSelect('Projet.category','Category')
             .where("User.id = :userId", { userId })
@@ -97,7 +102,25 @@ export class ProjetService {
             .getMany();
     }
 
-    
+    async favoriteProjet(
+        id: number,
+        user: User,
+      ): Promise<Projet> {
+        const projet = await this.getById(id);
+        projet.favoritedBy.push(user);
+        await projet.save();
+        return (await this.getById(id) );
+      }
+
+      async unfavoriteProjet(
+        id: number,
+        user: User,
+      ): Promise<Projet> {
+        const projet = await this.getById(id);
+        projet.favoritedBy = projet.favoritedBy.filter(fav => fav.id !== user.id);
+        await projet.save();
+        return (await this.getById(id));
+      }
 
 }
 

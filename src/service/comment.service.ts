@@ -3,6 +3,8 @@ import { PostgresDataSource } from '../config/datasource.config';
 import { Comment } from '../model/comment';
 import {  Injectable, NotFoundException } from '@nestjs/common';
 import  projetService from './projet.service';
+import userService from './user.service';
+import { User } from '../model/user';
 // import  userService  from './user.service';
 
 @Injectable()
@@ -17,6 +19,7 @@ export class CommentService {
     public async getComments(projetId: number, page: number = 1): Promise<Comment[]> {
         return this.commentRepository.createQueryBuilder()
             .leftJoin("Comment.projet", "Projet")
+            .leftJoinAndSelect("Comment.author" , "User.firstName")
             .where("Projet.id = :projetId", { projetId })
             .take(25)
             .skip((page - 1) * 25)
@@ -38,13 +41,13 @@ export class CommentService {
     
     public async getById(id: number): Promise<Comment | null> {
         return this.commentRepository.findOne( { where: { id }, 
-            relations:['projet','author']},
+            relations:['projet','author','replies','commentParent']},
             );
     }
 
-    // public async updateComment(commentId: number, comment: Comment) {
-    //     return this.commentRepository.save({ ...comment, id: commentId });
-    // }
+    public async updateComment(commentId: number, comment: Comment) {
+        return this.commentRepository.save({ ...comment, id: commentId });
+    }
 
     public async deleteCommentById(id: number/*, user: User*/): Promise<{ message: string }> {
         const comment = await this.commentRepository.delete(id/*,user.id*/ )
@@ -53,6 +56,43 @@ export class CommentService {
             throw new NotFoundException(`This ${id} is not found`)
         }
         return { message: 'Deleted successfully !' }
+    }
+
+    
+    async createReply(reply: Comment, comment: Comment,user:User): Promise<Comment> {
+        // const comment = await this.commentRepository.findOne({where:{id:commentId}});
+        // const user = await this.userRepository.findOne({where:{id:userId}});
+        const createdReply =  this.commentRepository.create({...reply,
+        author: user});
+        createdReply.commentParent = comment;
+        await this.commentRepository.save(createdReply);
+        return this.getById(createdReply.id)
+    }
+
+    async replyToComment(parentId: number,userId: number,reply:Comment): Promise<Comment> { 
+        try {
+            // Get comment to reply to
+            const commentParent = await this.commentRepository
+              .createQueryBuilder()
+              .leftJoinAndSelect('Comment.replies', 'Comment')
+              .where('commentParent.id = :id', { id: parentId })
+              .getOne();
+
+            if (!commentParent) {
+                throw new NotFoundException('Cannot find comment ' + parentId);
+            }
+            //Get user 
+            const user = await userService.getById(userId);
+            // // insert new reply and return reply id
+            const result = await this.createReply(reply,commentParent,user)
+            // // return new reply and add to post
+             const replyComment = await this.getById(result.id);
+            commentParent.replies = [...commentParent.replies, replyComment];
+            return await this.commentRepository.save(commentParent);
+          } catch (err) {
+            throw err;
+          }
+          return
     }
 }
 

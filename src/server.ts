@@ -13,8 +13,10 @@ import chapterRouter from './route/chapter.router';
 import courseRouter from './route/course.router';
 import labRouter from './route/lab.router';
 import stepRouter from './route/step.router';
-import projetRouter from './route/projet.route';
+import projetRouter from './route/projet.router';
 import commentRouter from './route/comment.route';
+import userRouter from './route/user.router';
+import noteRouter from './route/note.router';
 
 export class App {
 
@@ -22,7 +24,7 @@ export class App {
     private app: INestApplication;
 
     constructor() {
-
+        
         this._app = express();
         this._app.use(bodyParser.urlencoded({ extended: true }));
         this._app.use(express.json({
@@ -49,6 +51,7 @@ export class App {
          * Add your routes here
          */
 
+        this._app.use('/api/v1/user', userRouter.router);
         this._app.use('/api/v1/category', categoryRouter.router);
         // this._app.use('/api/v1/course', courseRouter.router);
         // this._app.use('/api/v1/chapter', chapterRouter.router);
@@ -56,6 +59,7 @@ export class App {
         // this._app.use('/api/v1/step', stepRouter.router);
         this._app.use('/api/v1/projet', projetRouter.router);
         this._app.use('/api/v1/comment', commentRouter.router);
+        this._app.use('/api/v1/note', noteRouter.router);
 
         this._app.get('/', (req, res) => res.send('welcome to lablib :) <a href="/api/v1/category">start from here</a>  <a href="/docs/v1">read the documentation</a> '));
     }

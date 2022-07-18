@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { BadRequestException } from '../error/BadRequestException.error';
-import { Controller, Get, Post, Body, Delete, Put, HttpException, HttpStatus, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, Put, HttpException, HttpStatus, Param, UnauthorizedException } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { NotFoundException } from '../error/NotFoundException.error';
 import projetService from '../service/projet.service';
@@ -79,12 +79,19 @@ export class ProjetController {
     @Put('/:projetId')
     public async updateProjet(req: Request, res: Response) {
         const {title, description,resume,rapport,image,presentation,videoDemo,codeSource,prix } = req.body;
-
+        const {userId} = req.currentUser;
+        // const user = res.locals.user
+        
         const projetId = Number(req.params.projetId);
         const projet = await projetService.getById(projetId);
 
         if (!projet) {
             throw new NotFoundException('Projet not found');
+        }
+
+        const user = await userService.getById(userId);
+        if(! projetService.ensureOwnership(user,projet)) {
+            throw new UnauthorizedException();
         }
 
         projet.title = title || projet.title;
@@ -115,12 +122,20 @@ export class ProjetController {
     @Delete('/:projetId')
     public async deleteProjet(req: Request, res: Response) {
         const { projetId } = req.params;
+        const {userId} = req.currentUser;
 
         const projet = await projetService.getById(Number(projetId));
 
         if (!projet) {
-            throw new NotFoundException('Course not found');
+            throw new NotFoundException('Projet not found');
         }
+        
+        const user = await userService.getById(userId);
+        if(! projetService.ensureOwnership(user,projet)) {
+            throw new UnauthorizedException();
+        }
+
+        
 
         await projetService.deleteProjetById(projet.id);
 
@@ -149,7 +164,8 @@ export class ProjetController {
         }
     })
     @Get('category/:categoryId/count')
-    async getCountByCategory(@Param('categoryId') categoryId: number) {
+    async getCountByCategory(req: Request , res: Response) {
+        const {categoryId} = req.body;
     try {
       const category = await categoryService.getById(categoryId);
       return await projetService.getProjetsCountByCategory(category);
