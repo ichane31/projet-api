@@ -41,7 +41,7 @@ export class CommentService {
     
     public async getById(id: number): Promise<Comment | null> {
         return this.commentRepository.findOne( { where: { id }, 
-            relations:['projet','author','replies','commentParent']},
+            relations:['projet','author','commentParent','replies']},
             );
     }
 

@@ -24,7 +24,7 @@ export class NoteService {
 
     public async getById(id: number): Promise<Note | null> {
         return this.noteRepository.findOne({ where: { id } ,
-        relations : ['project','user']});
+        relations : ['projet','user']});
     }
 
     public async deleteNoteById(id: number/*, user: User*/): Promise<{ message: string }> {

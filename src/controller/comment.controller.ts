@@ -51,7 +51,7 @@ export class CommentController {
     })
     @Get('/:commentId')
     public async commentById(req: Request, res: Response) {
-        const commentId = Number(req.params);
+        const commentId = Number(req.params.commentId);
         const comment = await commentService.getById(commentId);
 
         if (!comment) {
