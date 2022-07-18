@@ -25,17 +25,17 @@ export class ProjetService {
     }
     public async getAllProjet(page = 1, take = 20): Promise<Projet[]> {
         return this.projetRepository.find({
-            relations: ['category','author','comments'],
+            relations: ['category','author','comments','notes'],
             skip: take * (page - 1),
             take,
             order:{createdAt: 'DESC'}
         });
     }
 
-    async getProjetsCountByUser(user: User): Promise<number> {
+    async getProjetsCountByUser(author: User): Promise<number> {
         const ProjetsCountUser = await this.projetRepository
-          .createQueryBuilder('projet')
-          .innerJoin('projet.author', 'author', 'user.id = :userId', { userId: user.id })
+          .createQueryBuilder()
+          .innerJoin('Projet.author', 'author', 'author.id = :userId', { userId: author.id })
           .getCount();
         return ProjetsCountUser;
       }
@@ -50,7 +50,7 @@ export class ProjetService {
 
     public async getById(id: number): Promise<Projet | null> {
         return this.projetRepository.findOne({ where: { id }, 
-        relations:['category','author','comments']},
+        relations:['category','author','comments','notes']},
             );
     }
 
@@ -83,7 +83,8 @@ export class ProjetService {
     public async getByCategory(categoryId: number , page = 1, take = 25): Promise<Projet[]> {
         return this.projetRepository.createQueryBuilder()
             .leftJoinAndSelect("Projet.category", "Category")
-            // .leftJoinAndSelect('Projet.comments','Comment','Comment.projet.id = Projet.id')
+            .leftJoinAndSelect('Projet.comments','Comment')
+            .leftJoinAndSelect("Projet.notes","Note")
             .leftJoinAndSelect("Projet.author","User")
             .where("Category.id = :categoryId", { categoryId })
             .skip((page - 1) * take)
@@ -95,7 +96,8 @@ export class ProjetService {
     public async getProjetByUser(userId: number , page = 1, take = 25): Promise<Projet[]> {
         return this.projetRepository.createQueryBuilder()
             .innerJoinAndSelect("Projet.user", "User")
-            // .leftJoinAndSelect('Projet.comments','Comment')
+            .leftJoinAndSelect('Projet.comments','Comment')
+            .leftJoinAndSelect('Projet.notes','Note')
             .leftJoinAndSelect('Projet.category','Category')
             .where("User.id = :userId", { userId })
             .orderBy('createdAt','DESC')

@@ -165,7 +165,7 @@ export class ProjetController {
     })
     @Get('category/:categoryId/count')
     async getCountByCategory(req: Request , res: Response) {
-        const {categoryId} = req.body;
+        const categoryId = Number(req.params);
     try {
       const category = await categoryService.getById(categoryId);
       return await projetService.getProjetsCountByCategory(category);
@@ -173,6 +173,23 @@ export class ProjetController {
       throw new HttpException(err, HttpStatus.NO_CONTENT);
     }
   }
+
+  @ApiOperation({description:'count projet by user'})
+  @ApiResponse({
+      schema: {
+          example: 2
+      }
+  })
+  @Get('user/:userId/count')
+  async getCountByUser(req: Request , res: Response) {
+      const userId = Number(req.params);
+  try {
+    const user = await userService.getById(userId);
+    return await projetService.getProjetsCountByUser(user);
+  } catch (err) {
+    throw new HttpException(err, HttpStatus.NO_CONTENT);
+  }
+}
 
   @ApiOperation({ description: 'Get a list of projets for a given user' })
   @ApiOkResponse(
