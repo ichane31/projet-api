@@ -13,8 +13,8 @@ export class Projet extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column()
-    slug: string;
+    // @Column()
+    // slug: string;
 
     @Column({ type: "varchar"})
     title: string
@@ -54,13 +54,13 @@ export class Projet extends BaseEntity {
       this.updatedAt = new Date();
     }
 
-    @BeforeInsert()
-    generateSlug() {
-    this.slug =
-      slugify(this.title, { lower: true }) +
-      '-' +
-      ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
-  }
+  //   @BeforeInsert()
+  //   generateSlug() {
+  //   this.slug =
+  //     slugify(this.title, { lower: true }) +
+  //     '-' +
+  //     ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
+  // }
 
     @ManyToOne(
         () => Category,
