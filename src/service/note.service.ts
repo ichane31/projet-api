@@ -16,16 +16,17 @@ export class NoteService {
         return this.noteRepository.save({ ...note, id: noteId });
     }
 
+    public async createNote(note: Note ): Promise<Note> { 
+        const createdComment =  this.noteRepository.save(note);
+        return this.getById((await createdComment).id)
+        
+    }
+
     public async getById(id: number): Promise<Note | null> {
         return this.noteRepository.findOne({ where: { id } ,
         relations : ['project','user']});
     }
-
-    public async createNote(note: Note ): Promise<Note> { 
-        const createdComment =  await this.noteRepository.save(note);
-        return this.getById((createdComment).id)
-        
-    }
+    
     public async deleteNoteById(id: number/*, user: User*/): Promise<{ message: string }> {
         const comment = await this.noteRepository.delete(id/*,user.id*/ )
 
