@@ -20,10 +20,10 @@ export class CommentController {
         type: PostCommentDTO,
         description: 'infos about the new comment',
     })
-    @Post('/')
+    @Post('/:projetId')
     public async createComment(req: Request, res: Response) {
         const { body } = req.body;
-        const {projetId /*, userEmail*/} = req.body
+        const {projetId /*, userEmail*/} = req.params
 
         if (!projetId || !body/*|| !userEmail*/) {
             throw new BadRequestException('Missing required fields');

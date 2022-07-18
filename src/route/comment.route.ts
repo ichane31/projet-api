@@ -11,7 +11,7 @@ class CommentRouter {
 
     private routes() {
         
-        this.router.post('/', commentController.createComment);
+        this.router.post('/:projetId', commentController.createComment);
         this.router.get('/:commentId', commentController.commentById);
         this.router.put('/:commentId', commentController.updateComment);
         this.router.delete('/:commentId', commentController.deleteComment);
