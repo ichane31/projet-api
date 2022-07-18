@@ -22,4 +22,4 @@ import { NoteController } from './controller/note.controller';
   providers: [CategoryService/*, CourseService, ChapterService, LabService, StepService*/,ProjetService,CommentService,NoteService],
 })
 
-export class AppModule { }
+export class AppModule { } 
