@@ -69,18 +69,18 @@ export class NoteController {
     public async updateNote(req: Request, res: Response) {
         const { note} = req.body;
 
-        const { noteId , userId } = req.params;
+        const { noteId ,/* userId*/ } = req.params;
         const noteGet = await noteService.getById(Number(noteId));
 
         if (!noteGet) {
             throw new NotFoundException('Comment not found');
         }
 
-    if(noteGet.user.id !== Number(userId)) {
-        throw new HttpException('You do not own this note',
-        HttpStatus.UNAUTHORIZED,)
+    // if(noteGet.user.id !== Number(userId)) {
+    //     throw new HttpException('You do not own this note',
+    //     HttpStatus.UNAUTHORIZED,)
 
-    }
+    // }
 
         noteGet.value = note || noteGet.value;
 
@@ -97,7 +97,7 @@ export class NoteController {
     @Delete('/:noteId')
     public async deleteNote(req: Request, res: Response) {
         const { noteId } = req.params;
-        const userId = req.currentUser.userId;
+        // const userId = req.currentUser.userId;
 
         const note = await noteService.getById(Number(noteId));
 
@@ -106,11 +106,11 @@ export class NoteController {
             throw new NotFoundException('Note not found');
         }
         
-        if(note.user.id !== Number(userId)) {
-            throw new HttpException('You do not own this note',
-            HttpStatus.UNAUTHORIZED,)
+        // if(note.user.id !== Number(userId)) {
+        //     throw new HttpException('You do not own this note',
+        //     HttpStatus.UNAUTHORIZED,)
 
-        }
+        // }
 
         await noteService.deleteNoteById(note.id);
 
@@ -132,6 +132,24 @@ export class NoteController {
 
         let notes = await noteService.getNotes(Number(projetId));
         res.status(200).json(notes);
+    }
+
+    @ApiOperation({description:'count notes by projet'})
+    @ApiResponse({
+        schema: {
+            example: 3
+        }
+    })
+    @Get('/:projetId/count')
+    async getCountByProjet(req: Request , res: Response) {
+        const projetId = Number(req.params.projetId);
+    
+      const projet = await projetService.getById(projetId);
+      if (!projet) {
+        throw new NotFoundException('Projet not found');
+    }
+      let nbre = await noteService.getNotesCountByProjet(projetId);
+        res.status(200).json(nbre);
     }
 
 }

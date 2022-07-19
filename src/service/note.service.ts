@@ -2,6 +2,7 @@ import { DeleteResult, Repository } from 'typeorm';
 import { PostgresDataSource } from '../config/datasource.config';
 import { Note } from '../model/note';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import projetService from './projet.service';
 
 @Injectable()
 export class NoteService {
@@ -44,6 +45,23 @@ export class NoteService {
             .skip((page - 1) * 25)
             .getMany();
     }
+
+    
+    async CountNoteByProjet(projetId: number ): Promise<number> {
+        const projet = await projetService.getById(projetId);
+        if(projet){
+            return projet.notes.length
+        }
+                
+      }
+
+      async getNotesCountByProjet(projetId: number ): Promise<number> {
+        return await this.noteRepository.createQueryBuilder()
+            .leftJoinAndSelect("Note.projet", "Projet")
+            .where("Projet.id = :projetId", { projetId })
+            .getCount();
+          
+        }
 }
 
 export default new NoteService();

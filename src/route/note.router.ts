@@ -15,6 +15,7 @@ class NoteRouter {
         this.router.put('/:noteId', noteController.updateNote);
         this.router.delete('/:noteId', noteController.deleteNote);
         this.router.get('/:projetId/Notelist',noteController.getNoteByProjet);
+        this.router.get('/:projetId/count', noteController.getCountByProjet);
     }
 
 }

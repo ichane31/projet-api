@@ -15,9 +15,21 @@ export class ProjetService {
         this.projetRepository = PostgresDataSource.getRepository(Projet);
     }
 
-    getCount(): Promise<number> {
-        return this.projetRepository.count({});
+   async getCount(): Promise<number> {
+    const ProjetsCount = await this.projetRepository
+       .createQueryBuilder()
+       .leftJoin("Projet.category","Category")
+       .leftJoin("Projet.comments","Comments")
+       .leftJoin("Projet.author", "User")
+       .leftJoin("Projet.notes","Note")
+       .getCount();
+       return ProjetsCount;
       }
+
+    async count(): Promise<number> {
+      const count = await this.projetRepository.count();
+      return count
+    }
 
     public async update(projetId: number, projet: Projet) {
         
@@ -32,20 +44,21 @@ export class ProjetService {
         });
     }
 
-    async getProjetsCountByUser(author: User): Promise<number> {
+    async getProjetsCountByUser(authorId: number): Promise<number> {
         const ProjetsCountUser = await this.projetRepository
           .createQueryBuilder()
-          .innerJoin('Projet.author', 'author', 'author.id = :userId', { userId: author.id })
+          .leftJoinAndSelect("Projet.author", "User")
+          .where("Category.id = :categoryId", { authorId })
           .getCount();
         return ProjetsCountUser;
       }
 
-    async getProjetsCountByCategory(category: Category ): Promise<number> {
-        const ProjetsCount = await this.projetRepository
-          .createQueryBuilder('projet')
-          .innerJoin('Projet.category', 'category', 'category.id = :catId', { catId: category.id })
+    async getProjetsCountByCategory(categoryId: number ): Promise<number> {
+      return await this.projetRepository.createQueryBuilder()
+          .leftJoinAndSelect("Projet.category", "Category")
+          .where("Category.id = :categoryId", { categoryId })
           .getCount();
-        return ProjetsCount;
+        
       }
 
     public async getById(id: number): Promise<Projet | null> {

@@ -16,9 +16,9 @@ class ProjetRouter {
         this.router.get('/:projetId', projetController.projetById);
         this.router.put('/:projetId', projetController.updateProjet);
         this.router.delete('/:projetId', projetController.deleteProjet);
-        this.router.get('/count', projetController.getCount);
-        this.router.get('category/:categoryId/count', projetController.getCountByCategory);
-        this.router.get('user/:userId/count', projetController.getCountByUser);
+        this.router.get('/count', projetController.Count);
+        this.router.get('/:categoryId/count', projetController.getCountByCategory);
+        this.router.get('/:userId/count', projetController.getCountByUser);
         this.router.get('/:userId/list', projetController.allProjetsByUser);
     }
 

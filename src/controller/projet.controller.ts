@@ -79,7 +79,7 @@ export class ProjetController {
     @Put('/:projetId')
     public async updateProjet(req: Request, res: Response) {
         const {title, description,resume,rapport,image,presentation,videoDemo,codeSource,prix } = req.body;
-        const {userId} = req.currentUser;
+        // const {userId} = req.currentUser;
         // const user = res.locals.user
         
         const projetId = Number(req.params.projetId);
@@ -89,10 +89,10 @@ export class ProjetController {
             throw new NotFoundException('Projet not found');
         }
 
-        const user = await userService.getById(userId);
-        if(! projetService.ensureOwnership(user,projet)) {
-            throw new UnauthorizedException();
-        }
+        // const user = await userService.getById(userId);
+        // if(! projetService.ensureOwnership(user,projet)) {
+        //     throw new UnauthorizedException();
+        // }
 
         projet.title = title || projet.title;
         projet.description = description ||projet.description;
@@ -122,7 +122,7 @@ export class ProjetController {
     @Delete('/:projetId')
     public async deleteProjet(req: Request, res: Response) {
         const { projetId } = req.params;
-        const {userId} = req.currentUser;
+        // const {userId} = req.currentUser;
 
         const projet = await projetService.getById(Number(projetId));
 
@@ -130,10 +130,10 @@ export class ProjetController {
             throw new NotFoundException('Projet not found');
         }
         
-        const user = await userService.getById(userId);
-        if(! projetService.ensureOwnership(user,projet)) {
-            throw new UnauthorizedException();
-        }
+        // const user = await userService.getById(userId);
+        // if(! projetService.ensureOwnership(user,projet)) {
+        //     throw new UnauthorizedException();
+        // }
 
         
 
@@ -149,12 +149,11 @@ export class ProjetController {
         }
     })
     @Get('/count')
-    async getCount() {
-    try {
-      return await projetService.getCount();
-    } catch (err) {
-      throw new HttpException(err, HttpStatus.NO_CONTENT);
-    }
+    async Count(req: Request , res: Response) {
+   
+        let nbre = await projetService.getCount();
+        res.status(200).json(nbre);
+    
   }
 
     @ApiOperation({description:'count projet by category'})
@@ -163,16 +162,17 @@ export class ProjetController {
             example: 2
         }
     })
-    @Get('category/:categoryId/count')
+    @Get('/:categoryId/count')
     async getCountByCategory(req: Request , res: Response) {
-        const categoryId = Number(req.params);
-    try {
+        const categoryId = Number(req.params.categoryId);
+    
       const category = await categoryService.getById(categoryId);
-      return await projetService.getProjetsCountByCategory(category);
-    } catch (err) {
-      throw new HttpException(err, HttpStatus.NO_CONTENT);
+      if (!category) {
+        throw new NotFoundException('Category not found');
     }
-  }
+      let nbre = await projetService.getProjetsCountByCategory(categoryId);
+        res.status(200).json(nbre);
+    }
 
   @ApiOperation({description:'count projet by user'})
   @ApiResponse({
@@ -180,15 +180,17 @@ export class ProjetController {
           example: 2
       }
   })
-  @Get('user/:userId/count')
+  @Get('/:userId/count')
   async getCountByUser(req: Request , res: Response) {
-      const userId = Number(req.params);
-  try {
+      const userId = Number(req.params.userId);
+  
     const user = await userService.getById(userId);
-    return await projetService.getProjetsCountByUser(user);
-  } catch (err) {
-    throw new HttpException(err, HttpStatus.NO_CONTENT);
-  }
+    if (!user) {
+        throw new NotFoundException('User not found');
+    }
+    let nbreU = await projetService.getProjetsCountByUser(userId);
+        res.status(200).json(nbreU);
+ 
 }
 
   @ApiOperation({ description: 'Get a list of projets for a given user' })
