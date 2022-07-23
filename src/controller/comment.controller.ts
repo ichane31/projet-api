@@ -65,7 +65,7 @@ export class CommentController {
             throw new NotFoundException('Comment not found');
         }
 
-        res.status(200).json({ ...comment });
+        res.status(200).json({ ...comment , projet: comment.projet.id ,author: comment.author.firstname,  replies : comment.replies.length});
     }
 
     @ApiOperation({ description: 'Modify a comment' })
@@ -143,7 +143,8 @@ export class CommentController {
             throw new NotFoundException('Projet not found');
 
         let comments = await commentService.getComments(Number(projetId));
-        res.status(200).json(comments.map((comment) => ({...comment, projet: comment.projet.id ,reply: comment.replies.length })));
+        res.status(200).json(comments.map(c => {
+            return { ...c, projet: c.projet.id, author :c.author.firstname ,replis: c.replies.length }}));
     }
 
     @ApiOperation({ description: 'Get a list of replies for a given comment' })

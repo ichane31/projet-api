@@ -16,13 +16,24 @@ export class CommentService {
         this.commentRepository = PostgresDataSource.getRepository(Comment);
     }
 
-    public async getComments(projetId: number, page = 1): Promise<Comment[]> {
+    // public async getComments(projetId: number, page = 1): Promise<Comment[]> {
+    //     return this.commentRepository.createQueryBuilder()
+    //         .leftJoinAndSelect("Comment.projet", "Projet")
+    //         .leftJoinAndSelect("Comment.author" , "User.firstname")
+    //         .where("Projet.id = :projetId", { projetId })
+    //         .take(25)
+    //         .skip((page - 1) * 25)
+    //         .getMany();
+    // }
+    public async getComments(projetId: number , page = 1, take = 25): Promise<Comment[]> {
         return this.commentRepository.createQueryBuilder()
             .leftJoinAndSelect("Comment.projet", "Projet")
-            .leftJoinAndSelect("Comment.author" , "User.firstname")
+            .leftJoinAndSelect('Comment.author','User')
+            .leftJoinAndSelect("Comment.replies","Comment")
             .where("Projet.id = :projetId", { projetId })
-            .take(25)
-            .skip((page - 1) * 25)
+            .skip((page - 1) * take)
+            .take(take)
+            .orderBy('Comment.createdDate','DESC')
             .getMany();
     }
 
