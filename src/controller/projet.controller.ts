@@ -105,8 +105,8 @@ export class ProjetController {
 
         res.status(200).json({ ... projet,
         category: projet.category.name,
-        nbreComments :projet.commentCount,
-        nbreNotes: projet.notes.length});
+        Comments :projet.commentCount,
+        Notes: projet.notes.length});
     }
 
     @ApiOperation({ description: 'Modify a projet' })
@@ -127,9 +127,8 @@ export class ProjetController {
     })
     @Put('/:projetId')
     public async updateProjet(req: Request, res: Response) {
-        const {title, description,resume,rapport,image,presentation,videoDemo,codeSource,prix } = req.body;
-        // const {userId} = req.currentUser;
-        // const user = res.locals.user
+        const {title, description,prix , category } = req.body;
+        // const {userId} = req.currentUser.userId;
         
         const projetId = Number(req.params.projetId);
         const projet = await projetService.getById(projetId);
@@ -142,15 +141,27 @@ export class ProjetController {
         // if(! projetService.ensureOwnership(user,projet)) {
         //     throw new UnauthorizedException();
         // }
+        if(req.files) {
+            const {image , resume , rapport , presentation , videoDemo , codeSource} = req.files;
+            await fileService.deleteFiles(projet);
+            projet.image = (await fileService.saveFile("image" , image)).toString();
+            projet.resume = (await fileService.saveFile("resume" , resume)).toString();
+            projet.rapport = (await fileService.saveFile("rapport" , rapport)).toString();
+            projet.presentation = (await fileService.saveFile("presentation" , presentation)).toString();
+            projet.videoDemo = (await fileService.saveFile("video" , videoDemo)).toString();
+            projet.codeSource = (await fileService.saveFile("code" , codeSource)).toString();
+
+        }
+        if (typeof category !== 'undefined') {
+            let $category = await categoryService.getByName(category);
+            if (!$category) {
+                throw new NotFoundException('Cannot find category ' + category);
+            }
+            projet.category = $category;
+        }
 
         projet.title = title || projet.title;
         projet.description = description ||projet.description;
-        projet.resume = resume || projet.resume;
-        projet.rapport = rapport || projet.rapport;
-        projet.image = image || projet.image;
-        projet.presentation = presentation || projet.presentation;
-        projet.videoDemo = videoDemo || projet.videoDemo;
-        projet.codeSource = codeSource || projet.codeSource;
         projet.prix = prix || projet.prix
        
 
@@ -184,13 +195,15 @@ export class ProjetController {
     @Delete('/:projetId')
     public async deleteProjet(req: Request, res: Response) {
         const { projetId } = req.params;
-        // const {userId} = req.currentUser;
+        // const {userId} = req.currentUser.userId;
 
         const projet = await projetService.getById(Number(projetId));
 
         if (!projet) {
             throw new NotFoundException('Projet not found');
         }
+
+        await fileService.deleteFiles(projet);
         
         // const user = await userService.getById(userId);
         // if(! projetService.ensureOwnership(user,projet)) {

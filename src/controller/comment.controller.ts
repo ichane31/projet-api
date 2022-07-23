@@ -48,7 +48,7 @@ export class CommentController {
         comment.projet = $projet;
         const newComment = await commentService.createComment(comment);
 
-        res.status(201).json({ ...newComment, projet: comment.projet.title });
+        res.status(201).json({ ...newComment, projet: comment.projet.id });
     }
 
     @ApiOperation({ description: 'Get details of a comment' })
@@ -136,14 +136,14 @@ export class CommentController {
     })
     @Get('/:projetId/list')
     public async getCommentsByProjet(req: Request, res: Response) {
-        const { projetId } = req.params;
+        const  projetId  = req.params.projetId;
         const projet = await projetService.getById(Number(projetId));
 
         if (!projet)
             throw new NotFoundException('Projet not found');
 
         let comments = await commentService.getComments(Number(projetId));
-        res.status(200).json(comments.map((comment) => ({...comment, projet: comment.projet.id ,nbreReply: comment.replies.length })));
+        res.status(200).json(comments.map((comment) => ({...comment, projet: comment.projet.id ,reply: comment.replies.length })));
     }
 
     @ApiOperation({ description: 'Get a list of replies for a given comment' })
@@ -160,7 +160,7 @@ export class CommentController {
             throw new NotFoundException('Comment not found');
 
         let replies = await commentService.getReplies(Number(parentId));
-        res.status(200).json(replies);
+        res.status(200).json(replies.map((reply) => ({...reply, projet: reply.projet.id ,reply: reply.replies.length })));
     }
 
     @ApiOperation({ description: 'count comment for a given projet' })
@@ -226,7 +226,8 @@ export class CommentController {
         const replyComment = await commentService.getById(result.id);
     
         commentParent.replies = [...commentParent.replies, replyComment];
-        return await this.commentRepository.save(commentParent);
+       await this.commentRepository.save(commentParent);
+       res.status(200).json(result);
 
     }
 
