@@ -185,17 +185,17 @@ export class UserController {
 			role: user.role as Role
 		});
 
-		req.sessionOptions.expires = moment().add(1, 'day').toDate();
-		/*const token = jwtService.sign({
-			userId: user.id,
-			role: user.role as Role
-		});
-		res.cookie("Authorization", "Bearer " + token, {
-			httpOnly: true,
-			maxAge: 3600000,
-			sameSite: "none",
-			secure: true,
-		});*/
+		// req.sessionOptions.expires = moment().add(1, 'day').toDate();
+		// /*const token = jwtService.sign({
+		// 	userId: user.id,
+		// 	role: user.role as Role
+		// });
+		// res.cookie("Authorization", "Bearer " + token, {
+		// 	httpOnly: true,
+		// 	maxAge: 3600000,
+		// 	sameSite: "none",
+		// 	secure: true,
+		// });*/
 		user.active = new Date();
 		await userService.update(user.id, user);
 		res.status(200).json({ ...user, password: undefined });
