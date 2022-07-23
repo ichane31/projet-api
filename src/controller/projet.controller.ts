@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { BadRequestException } from '../error/BadRequestException.error';
 import { Controller, Get, Post, Body, Delete, Put, HttpException, HttpStatus, Param, UnauthorizedException } from '@nestjs/common';
-import { ApiBody, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { NotFoundException } from '../error/NotFoundException.error';
 import projetService from '../service/projet.service';
 import { PostProjetDTO } from '../dto/post.projet.dto';
@@ -9,6 +9,7 @@ import categoryService from '../service/category.service';
 import { Projet } from '../model/projet';
 import { PutProjetDTO } from '../dto/put.projet.dto';
 import userService from '../service/user.service';
+import { number } from 'joi';
 
 @ApiTags('Projet')
 @Controller('api/v1/projet')
@@ -16,7 +17,7 @@ export class ProjetController {
     @ApiOperation({description: 'Get list of projet'})
     @Get('/')
     public async getProjets(req: Request, res: Response) {
-        res.status(200).json((await projetService.getAllProjet()).map((projet) => ({ ...projet })));
+        res.status(200).json((await projetService.getAllProjet()).map((projet) => ({ ...projet,category :projet.category.name, nbreComments: projet.comments.length, nbreNote: projet.notes.length })));
     }
 
     @ApiOperation({ description: 'Create a new projet' })
@@ -24,11 +25,24 @@ export class ProjetController {
         type: PostProjetDTO,
         description: 'infos about the new projet'
     })
+    @ApiOkResponse(
+        {
+            description: 'Projet created',
+            schema: {
+                type: 'Projet',
+                
+            }
+        }
+    )
+    @ApiResponse({
+        status: 401,
+        description: 'returned if the body request has missing required fields ',
+    })
     @Post('/')
     public async createProjet(req: Request, res: Response) {
         const {title, description,resume,rapport,image,presentation,videoDemo,codeSource,prix , category} = req.body
         // const {userEmail} = req.body
-        if (!category ) {
+        if (!category || title) {
             throw new BadRequestException('Missing required fields');
         }
 
@@ -38,6 +52,10 @@ export class ProjetController {
         }
 
         const proj = new Projet()
+        if(req.files){
+            let files = req.files;
+
+        }
         proj.title = title
         proj.description = description
         proj.resume = resume
@@ -56,6 +74,13 @@ export class ProjetController {
     }
 
     @ApiOperation({ description: 'Get details of a projet' })
+    @ApiParam({
+        name: 'projetId',
+        description: 'id of the projet',
+        allowEmptyValue: false,
+        type: number,
+        examples: { a: { summary: 'id of the projet is 5', value: 5 } }
+    })
     @ApiResponse({
         status: 404,
         description: 'Projet not found',
@@ -63,11 +88,25 @@ export class ProjetController {
     @Get('/:projetId')
     public async projetById(req: Request, res: Response) {
         const projetId = Number(req.params.projetId);
+        const projet = await projetService.getById(projetId);
+        if(!projet) {
+            throw new NotFoundException('Projet not found')
+        }
 
-        res.status(200).json({ ...await projetService.getById(projetId) });
+        res.status(200).json({ ... projet,
+        category: projet.category.name,
+        nbreComments :projet.commentCount,
+        nbreNotes: projet.notes.length});
     }
 
     @ApiOperation({ description: 'Modify a projet' })
+    @ApiParam({
+        name: 'projetId',
+        description: 'id of the projet',
+        allowEmptyValue: false,
+        type: number,
+        examples: { a: { summary: 'id of the category is 5', value: 5 } }
+    })
     @ApiBody({
         type: PutProjetDTO,
         description: 'infos to be updated',
@@ -107,10 +146,23 @@ export class ProjetController {
 
         const updatedProjet = await projetService.update(Number(projetId), projet);
 
-        return res.status(200).json({ ...updatedProjet });
+        return res.status(200).json({ ...updatedProjet,comments: updatedProjet.commentCount, notes: updatedProjet.notes.length });
     }
 
     @ApiOperation({ description: 'Delete a projet from the database.' })
+    @ApiParam({
+        name: 'projetId',
+        description: 'id of the projet',
+        allowEmptyValue: false,
+        type: number,
+    })
+    @ApiOkResponse({
+        description: 'projet is deleted successfully',
+        schema: {
+            type: 'empty object',
+            example: {}
+        }
+    })
     @ApiResponse({
         status: 404,
         description: 'Projet not found',
@@ -157,6 +209,12 @@ export class ProjetController {
   }
 
     @ApiOperation({description:'count projet by category'})
+    @ApiParam({
+        name: 'categoryId',
+        description: 'id of the category',
+        allowEmptyValue: false,
+        type: number,
+    })
     @ApiResponse({
         schema: {
             example: 2
@@ -194,6 +252,13 @@ export class ProjetController {
 }
 
   @ApiOperation({ description: 'Get a list of projets for a given user' })
+  @ApiParam({
+    name: 'userId',
+    description: 'id of the user',
+    allowEmptyValue: false,
+    type: number,
+    examples: { a: { summary: 'id of the category is 5', value: 5 } }
+})
   @ApiOkResponse(
       {
           description: 'Projets list',
@@ -213,8 +278,76 @@ export class ProjetController {
       }
 
       let projets = await projetService.getProjetByUser(Number(userId));
-      res.status(200).json(projets);
+      res.status(200).json(projets.map(((projet) => ({ ...projet, user: projet.author.firstName,
+         comments: projet.commentCount, notes:projet.notes.length }))));
   }
+
+  @ApiOperation({ description: 'favorite a projet' })
+  @ApiParam({
+    name: 'projetId',
+    description: 'id of the projet',
+    allowEmptyValue: false,
+    type: number,
+    examples: { a: { summary: 'id of the projet is 2', value: 2 } }
+})
+  @ApiOkResponse(
+      {
+          description: 'favorited projet',
+          schema: {
+              type: 'Projet',
+            
+          }
+      }
+  )
+  @Post('/:projetId/favorite')
+  public async favoriteProjet(req: Request , res: Response) {
+      const projetId = Number(req.params.projetId);
+      const userId = req.currentUser.userId;
+
+      const projet = await projetService.getById(projetId);
+      if(!projet) {
+        throw new NotFoundException('Projet not found');
+      }
+
+      const user = await userService.getById(userId);
+
+      const favProjet = await projetService.favoriteProjet(projetId, user);
+      return res.status(200).json({ ...favProjet,comments: favProjet.commentCount, notes: favProjet.notes.length, favorites: favProjet.favoritesCount });
+    
+  }
+
+@ApiOperation({ description: 'unfavorite a projet' })
+@ApiParam({
+    name: 'projetId',
+    description: 'id of the projet',
+    allowEmptyValue: false,
+    type: number,
+    examples: { a: { summary: 'id of the projet is 2', value: 2 } }
+})
+@ApiOkResponse(
+      {
+          description: 'unfavorite projet',
+          schema: {
+              type: 'Projet',
+            
+          }
+      }
+  )
+@Delete('/:projetId/unfavorite')
+public async unfavoriteProjet(req: Request , res: Response){
+    const projetId = Number(req.params.projetId);
+    const userId = req.currentUser.userId;
+
+    const projet = await projetService.getById(projetId);
+    if(!projet) {
+      throw new NotFoundException('Projet not found');
+    }
+
+    const user = await userService.getById(userId);
+    const unfavProjet = await projetService.unfavoriteProjet(projetId, user);
+      return res.status(200).json({ ...unfavProjet,comments: unfavProjet.commentCount, notes: unfavProjet.notes.length, favorites: unfavProjet.favoritesCount });
+
+}
 
     
 }

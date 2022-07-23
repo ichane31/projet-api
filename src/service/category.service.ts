@@ -2,6 +2,7 @@ import { DeleteResult, Repository } from 'typeorm';
 import { PostgresDataSource } from '../config/datasource.config';
 import { Category } from '../model/category';
 import { Injectable } from '@nestjs/common';
+import { NotFoundException } from '../error/NotFoundException.error';
 
 @Injectable()
 export class CategoryService {
@@ -16,11 +17,14 @@ export class CategoryService {
 		return this.categoryRepository.save({ ...category, id: categoryId });
 	}
 	public async getAll(): Promise<Category[]> {
-		return this.categoryRepository.find();
+		return this.categoryRepository.find({
+			relations: ['projets']
+		});
 	}
 
 	public async getById(id: number): Promise<Category | null> {
-		return this.categoryRepository.findOne({ where: { id } });
+		return this.categoryRepository.findOne({ where: { id },
+		relations :['projets'] });
 	}
 
 	public async create(category: Category): Promise<Category> {
@@ -35,9 +39,8 @@ export class CategoryService {
 	public async delete(id: number): Promise<DeleteResult> {
 		return this.categoryRepository.delete({ id });
 	}
-
 	public async getByName(name: string): Promise<Category | null> {
-		return this.categoryRepository.findOneBy({ name });
+		return this.categoryRepository.findOne({ where: { name }, relations: ['projets'] });
 	}
 	
 }

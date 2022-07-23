@@ -5,7 +5,7 @@ import {  Injectable, NotFoundException } from '@nestjs/common';
 import  projetService from './projet.service';
 import userService from './user.service';
 import { User } from '../model/user';
-// import  userService  from './user.service';
+// import  likesService  from './likes.service';
 
 @Injectable()
 export class CommentService {
@@ -21,6 +21,16 @@ export class CommentService {
             .leftJoin("Comment.projet", "Projet")
             .leftJoinAndSelect("Comment.author" , "User.firstName")
             .where("Projet.id = :projetId", { projetId })
+            .take(25)
+            .skip((page - 1) * 25)
+            .getMany();
+    }
+
+    public async getReplies(parentId: number, page: number = 1): Promise<Comment[]> {
+        return this.commentRepository.createQueryBuilder()
+            .leftJoin("Comment.commentParent", "Comment")
+            .leftJoinAndSelect("Comment.author" , "User.firstName")
+            .where("Comment.id = :parentId", { parentId })
             .take(25)
             .skip((page - 1) * 25)
             .getMany();
@@ -76,6 +86,23 @@ export class CommentService {
         return (await comment).replies.length
                 
       }
+
+    // async likeComment(token: string, commentId: number): Promise<boolean> {
+    //     return await this.likeUnlikeCommentHelper(token, commentId, 'like');
+    //   }
+    // likeUnlikeCommentHelper(token: string, commentId: number, type: 'like' | 'unlike',): boolean | PromiseLike<boolean> {
+    
+    // const user = await this.authService.getUserFromSessionToken(token);
+
+    // const comment =  this.getById(commentId);
+    // if (!comment) {
+    //   throw new NotFoundException('Comment not found');
+    // }
+
+    // return type === 'like'
+    //   ?   likesService.likeComment(comment, user)
+    //   :   likesService.unlikeComment(commentId, user.id);
+    // }
 
 }
 

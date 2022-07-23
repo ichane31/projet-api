@@ -5,16 +5,13 @@ import { Category } from "./category";
 import { Comment } from "./comment";
 import { Note } from "./note";
 import { User } from "./user";
-import { File } from "./files";
+import { Files } from "./files";
 
 
 @Entity()
 export class Projet extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number
-
-    // @Column()
-    // slug: string;
 
     @Column({ type: "varchar"})
     title: string
@@ -53,14 +50,6 @@ export class Projet extends BaseEntity {
     updateTimestamp() {
       this.updatedAt = new Date();
     }
-
-  //   @BeforeInsert()
-  //   generateSlug() {
-  //   this.slug =
-  //     slugify(this.title, { lower: true }) +
-  //     '-' +
-  //     ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
-  // }
 
     @ManyToOne(
         () => Category,
@@ -103,7 +92,7 @@ export class Projet extends BaseEntity {
       @RelationCount((projet: Projet) => projet.favoritedBy)
       favoritesCount: number;
     
-      @Expose() get commentCount(): number {
+    @Expose() get commentCount(): number {
         return this.comments?.length;
       }
 

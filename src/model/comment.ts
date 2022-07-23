@@ -1,4 +1,5 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationCount } from "typeorm";
+import { Likes } from "./likes";
 import { Projet } from "./projet";
 import { User } from "./user";
 
@@ -7,20 +8,8 @@ export class Comment extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number
 
-    // @Column()
-    // userId:number
-
     @Column({type:"varchar"})
     body:string
-
-    // @Column({ default: 'n/a' })
-    // author?: string;
-
-    // @Column({ default: 0 })
-    // likes?: number;
-
-    // @Column({ default: 0 })
-    // dislikes?: number
 
     @CreateDateColumn({ type: 'timestamp' })
     createdDate: Date
@@ -42,5 +31,11 @@ export class Comment extends BaseEntity {
 
     @OneToMany(()=> Comment , comment => comment.commentParent)
     replies: Comment[]
+
+    // @OneToMany(() => Likes,)
+    // likes: Likes[];
+    
+    // @RelationCount((comment: Comment) => comment.likes)
+    // likesCount: number;
 
 }

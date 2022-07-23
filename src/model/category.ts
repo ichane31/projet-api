@@ -1,6 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, OneToOne, JoinColumn } from "typeorm";
 import { Course } from "./course";
 import { Projet } from "./projet";
+import { Files } from "./files";
+
 @Entity()
 export class Category extends BaseEntity {
     @PrimaryGeneratedColumn()
@@ -27,4 +29,12 @@ export class Category extends BaseEntity {
         projet => projet.category
     )
     projets: Projet[]
+
+    // @OneToOne(
+    //     () => File,
+    //     {
+    //       nullable: true
+    //     }
+    //   )
+    // categoryImage: File
 }

@@ -1,33 +1,15 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Projet } from './projet';
- 
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
+
 @Entity()
-export class File extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  public id: number;
- 
-  @Column()
-  filename: string;
- 
-  @Column({
-    type: 'bytea',
-  })
-  data: Uint8Array; 
-
-
-//   @ManyToOne(
-//     () => User,
-//     (user: User) => user.files,
-//     { onUpdate: 'CASCADE', onDelete: 'CASCADE' },
-//   )
-//   @JoinColumn({ name: 'user_id' })
-//   user: User;
-
-  // @ManyToOne(
-  //   () => Projet,
-  //   (projet: Projet) => projet.files,
-  //   { onUpdate: 'CASCADE', onDelete: 'SET NULL' },
-  // )
-  // @JoinColumn({ name: 'projet_id' })
-  // projet: Projet;
+export class Files extends BaseEntity {
+    @PrimaryGeneratedColumn('uuid')
+    id: string
+    @Column({
+        type: 'bytea'
+    })
+    content: Buffer
+    @CreateDateColumn()
+    createdAt: Date;
+    @UpdateDateColumn()
+    updatedAt: Date;
 }

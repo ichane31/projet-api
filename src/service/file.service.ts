@@ -1,34 +1,27 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { PostgresDataSource } from '../config/datasource.config';
-import {File} from '../model/files';
- 
+import { Injectable } from '@nestjs/common';
+import { Files } from '../model/files';
+
 @Injectable()
-class DatabaseFilesService {
-    private filesRepository: Repository<File>;
+export class FileService {
+
+    private fileRepository: Repository<Files>;
 
     constructor() {
-        this.filesRepository = PostgresDataSource.getRepository(File);
+        this.fileRepository = PostgresDataSource.getRepository(Files);
     }
- 
-  async uploadDatabaseFile(dataBuffer: Buffer, filename: string) {
-    const newFile = this.filesRepository.create({
-      filename,
-      data: dataBuffer
-    })
-    await this.filesRepository.save(newFile);
-    return newFile;
-  }
- 
-  async getFileById(id: number) {
-    const file = await this.filesRepository.findOne({where:{id},
-    relations: ['projet']});
-    if (!file) {
-      throw new NotFoundException(`This ${id} is not found`);
+
+    public async getById(id: string): Promise<Files | null> {
+        return this.fileRepository.findOne({ where: { id } });
     }
-    return file;
-  }
+
+    public async create(image: Files): Promise<Files> {
+        return this.fileRepository.save(image);
+    }
+    public async delete(id: string): Promise<DeleteResult> {
+        return this.fileRepository.delete({ id });
+    }
 }
- 
-export default DatabaseFilesService;
+
+export default new FileService();
