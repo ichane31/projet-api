@@ -143,8 +143,7 @@ export class CommentController {
             throw new NotFoundException('Projet not found');
 
         let comments = await commentService.getComments(Number(projetId));
-        res.status(200).json(comments.map(c => {
-            return { ...c, projet: c.projet.id, nbrereplis: c.replies.length }}));
+        res.status(200).json(comments.map(((comment) => ({ ...comment, projet: comment.projet.id , nbrereplies:comment.replies.length }))));
     }
 
     @ApiOperation({ description: 'Get a list of replies for a given comment' })
