@@ -68,7 +68,7 @@ export class CategoryController {
             let image = req.files.image;
             if(valideFile("image",image.mimetype,image.size)) {
                 const newImage = new Files();
-                newImage.content = image.buffer;
+                newImage.content = image.data;
                 $image = await fileService.create(newImage);
             }
             
@@ -133,20 +133,18 @@ export class CategoryController {
         }
         name && (category.name = name);
         description && (category.description = description);
-        if (req.files && req.files['image'][0]) {
-            let image = req.file;
-            const mimetype = image.mimetype;
-            const size = image.size;
+        if (req.files && req.files.image) {
+            let image = req.files.image;
             await fileService.delete(category.image);
             const newImage = new Files();
-            newImage.content = image.buffer;
+            newImage.content = image.data;
             let $image = await fileService.create(newImage);
             category.image = $image.id;
         }
 
         const updatedCategory = await categoryService.update(Number(categoryId), category);
 
-        return res.status(200).json({ ...updatedCategory, courses: updatedCategory.courses.length });
+        return res.status(200).json({ ...updatedCategory, projets: updatedCategory.projets.length });
     }
 
 
@@ -180,8 +178,7 @@ export class CategoryController {
         if (!category) {
             throw new NotFoundException('Category not found');
         }
-
-        await fileService.delete(category.image)
+       if (category.image) await fileService.delete(category.image)
         await categoryService.delete(category.id);
 
         return res.status(200).json({});

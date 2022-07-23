@@ -9,9 +9,9 @@ export class User extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number
     @Column()
-    firstName: string
+    firstname: string
     @Column()
-    lastName: string
+    lastname: string
     @Column()
     email: string
     @Column()
@@ -24,6 +24,14 @@ export class User extends BaseEntity {
         default: Role.USER
 	})
     role: Role
+    @Column({
+        nullable: true
+    })
+    active: Date
+    @Column({
+        default: false
+    })
+    MFA: boolean
     @OneToMany(
         () => Lab,
         lab => lab.user

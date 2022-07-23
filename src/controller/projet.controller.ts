@@ -10,6 +10,7 @@ import { Projet } from '../model/projet';
 import { PutProjetDTO } from '../dto/put.projet.dto';
 import userService from '../service/user.service';
 import { number } from 'joi';
+import fileService from '../service/file.service';
 
 @ApiTags('Projet')
 @Controller('api/v1/projet')
@@ -17,7 +18,7 @@ export class ProjetController {
     @ApiOperation({description: 'Get list of projet'})
     @Get('/')
     public async getProjets(req: Request, res: Response) {
-        res.status(200).json((await projetService.getAllProjet()).map((projet) => ({ ...projet,category :projet.category.name, nbreComments: projet.comments.length, nbreNote: projet.notes.length })));
+        res.status(200).json((await projetService.getAllProjet()).map((projet) => ({ ...projet,category :projet.category.name, Comments: projet.comments.length, notes: projet.notes.length })));
     }
 
     @ApiOperation({ description: 'Create a new projet' })
@@ -40,7 +41,7 @@ export class ProjetController {
     })
     @Post('/')
     public async createProjet(req: Request, res: Response) {
-        const {title, description,resume,rapport,image,presentation,videoDemo,codeSource,prix , category} = req.body
+        const {title, description,prix , category} = req.body;
         // const {userEmail} = req.body
         if (!category || title) {
             throw new BadRequestException('Missing required fields');
@@ -50,22 +51,31 @@ export class ProjetController {
         if (!$category) {
             throw new NotFoundException('Cannot find category ' + category);
         }
-
-        const proj = new Projet()
-        if(req.files){
-            let files = req.files;
+        let $image , $resume , $rapport , $presentation , $videoDemo , $code = null;
+        if (req.files) {
+             
+        const {image , resume , rapport , presentation , videoDemo , codeSource} = req.files;
+        $image = fileService.saveFile("image" , image);
+        $resume = fileService.saveFile("resume" , resume);
+        $rapport = fileService.saveFile("rapport" , rapport);
+        $presentation = fileService.saveFile("presentation" , presentation);
+        $videoDemo = fileService.saveFile("video" , videoDemo);
+        $code = fileService.saveFile("code" , codeSource);
 
         }
-        proj.title = title
-        proj.description = description
-        proj.resume = resume
-        proj.rapport = rapport
-        proj.image = image
-        proj.presentation = presentation
-        proj.videoDemo = videoDemo
-        proj.codeSource = codeSource
-        proj.prix = prix
-        proj.category = $category
+
+        const proj = new Projet()
+
+        proj.title = title;
+        proj.description = description;
+        proj.resume = $resume;
+        proj.rapport = $rapport;
+        proj.image = $image;
+        proj.presentation = $presentation;
+        proj.videoDemo = $videoDemo;
+        proj.codeSource = $code ;
+        proj.prix = prix;
+        proj.category = $category;
 
         const newProjet = await projetService.createProj(proj/*,userEmail*/);
         res.status(201).json({ ...newProjet, category: proj.category.name });
@@ -278,7 +288,7 @@ export class ProjetController {
       }
 
       let projets = await projetService.getProjetByUser(Number(userId));
-      res.status(200).json(projets.map(((projet) => ({ ...projet, user: projet.author.firstName,
+      res.status(200).json(projets.map(((projet) => ({ ...projet, user: projet.author.firstname,
          comments: projet.commentCount, notes:projet.notes.length }))));
   }
 
