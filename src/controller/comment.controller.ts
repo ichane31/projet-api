@@ -153,7 +153,7 @@ export class CommentController {
     })
     @Get('/:parentId/Replieslist')
     public async getRepliesByComment(req: Request, res: Response) {
-        const { parentId } = req.params;
+        const parentId  = req.params.parentId;
         const commentParent = await commentService.getById(Number(parentId));
 
         if (!commentParent)
@@ -222,12 +222,11 @@ export class CommentController {
         // reply.author = $user;
         reply.body = body;
         reply.commentParent = commentParent;
-        const result = await commentService.createReply(reply)
-        const replyComment = await commentService.getById(result.id);
-    
-        commentParent.replies = [...commentParent.replies, replyComment];
-       await this.commentRepository.save(commentParent);
-       res.status(200).json(result);
+        const result = await commentService.createComment(reply)
+        
+        commentParent.replies.push(result);
+        await this.commentRepository.save(commentParent);
+        res.status(200).json({...result , commentParent : result.commentParent.id} );
 
     }
 

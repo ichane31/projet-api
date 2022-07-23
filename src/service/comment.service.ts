@@ -39,8 +39,8 @@ export class CommentService {
 
     public async getReplies(parentId: number, page = 1): Promise<Comment[]> {
         return this.commentRepository.createQueryBuilder()
-            .leftJoin("Comment.commentParent", "Comment")
-            .leftJoinAndSelect("Comment.author" , "User.firstname")
+            .leftJoinAndSelect("Comment.commentParent", "Comment")
+            .leftJoinAndSelect("Comment.author" , "User")
             .where("Comment.id = :parentId", { parentId })
             .take(25)
             .skip((page - 1) * 25)
@@ -77,11 +77,6 @@ export class CommentService {
             throw new NotFoundException(`This ${id} is not found`)
         }
         return { message: 'Deleted successfully !' }
-    }
-
-    public async createReply(reply: Comment ): Promise<Comment> { 
-        const createdReply =  this.commentRepository.save(reply);
-        return this.getById((await createdReply).id)
     }
 
     async CountCommentByProjet(projetId: number ): Promise<number> {
