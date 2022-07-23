@@ -14,5 +14,3 @@ export const config = {
 	EMAIL_USERNAME: process.env.EMAIL_USERNAME,
 	EMAIL_PASSWORD: process.env.EMAIL_PASSWORD
 };
-
-// MarwaHind123
