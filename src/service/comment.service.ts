@@ -29,7 +29,7 @@ export class CommentService {
     public async getReplies(parentId: number, page = 1): Promise<Comment[]> {
         return this.commentRepository.createQueryBuilder()
             .leftJoin("Comment.commentParent", "Comment")
-            .leftJoinAndSelect("Comment.author" , "User.firstName")
+            .leftJoinAndSelect("Comment.author" , "User.firstname")
             .where("Comment.id = :parentId", { parentId })
             .take(25)
             .skip((page - 1) * 25)
@@ -100,7 +100,7 @@ export class CommentService {
     // }
 
     // return type === 'like'
-    //   ?   likesService.likeComment(comment, user)
+    /*   ?   likesService.likeComment(comment, user)*/
     //   :   likesService.unlikeComment(commentId, user.id);
     // }
 
