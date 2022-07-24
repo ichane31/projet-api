@@ -31,7 +31,7 @@ export class CommentController {
             return {
                 ...comment,
                 projet: comment.projet.id,
-                replies: comment.replies,
+                nbrereplies: comment.replies.length,
                 
             }
         })
