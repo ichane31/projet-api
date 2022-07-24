@@ -222,6 +222,7 @@ export class CommentController {
         // reply.author = $user;
         reply.body = body;
         reply.commentParent = commentParent;
+        reply.projet = commentParent.projet;
         const result = await commentService.createComment(reply)
         
         commentParent.replies.push(result);

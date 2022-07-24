@@ -29,7 +29,7 @@ export class CommentService {
         return this.commentRepository.createQueryBuilder()
             .leftJoinAndSelect("Comment.projet", "Projet")
             .leftJoinAndSelect('Comment.author','User')
-            .leftJoinAndSelect("Comment.replies","Comment")
+            //.innerJoinAndSelect("Comment.replies","Comment")
             .where("Projet.id = :projetId", { projetId })
             .skip((page - 1) * take)
             .take(take)
@@ -39,9 +39,9 @@ export class CommentService {
 
     public async getReplies(parentId: number, page = 1): Promise<Comment[]> {
         return this.commentRepository.createQueryBuilder()
-            .leftJoinAndSelect("Comment.commentParent", "Comment")
+            .innerJoinAndSelect("Comment.commentParent", "Comment")
             .leftJoinAndSelect("Comment.author" , "User")
-            .where("Comment.id = :parentId", { parentId })
+            .where("Comment.commentParent.id = :parentId", { parentId })
             .take(25)
             .skip((page - 1) * 25)
             .getMany();
