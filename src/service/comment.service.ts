@@ -16,26 +16,17 @@ export class CommentService {
         this.commentRepository = PostgresDataSource.getRepository(Comment);
     }
 
-    // public async getComments(projetId: number, page = 1): Promise<Comment[]> {
+    // public async getComments(projetId: number , page = 1, take = 25): Promise<Comment[]> {
     //     return this.commentRepository.createQueryBuilder()
     //         .leftJoinAndSelect("Comment.projet", "Projet")
-    //         .leftJoinAndSelect("Comment.author" , "User.firstname")
+    //         .leftJoinAndSelect('Comment.author','User')
+    //         //.innerJoinAndSelect("Comment.replies","Comment")
     //         .where("Projet.id = :projetId", { projetId })
-    //         .take(25)
-    //         .skip((page - 1) * 25)
+    //         .skip((page - 1) * take)
+    //         .take(take)
+    //         .orderBy('Comment.createdDate','DESC')
     //         .getMany();
     // }
-    public async getComments(projetId: number , page = 1, take = 25): Promise<Comment[]> {
-        return this.commentRepository.createQueryBuilder()
-            .leftJoinAndSelect("Comment.projet", "Projet")
-            .leftJoinAndSelect('Comment.author','User')
-            //.innerJoinAndSelect("Comment.replies","Comment")
-            .where("Projet.id = :projetId", { projetId })
-            .skip((page - 1) * take)
-            .take(take)
-            .orderBy('Comment.createdDate','DESC')
-            .getMany();
-    }
 
     public async getReplies(parentId: number, page = 1): Promise<Comment[]> {
         return this.commentRepository.createQueryBuilder()
@@ -47,12 +38,12 @@ export class CommentService {
             .getMany();
     }
 
-    // async getAllComments(projetId: number, page: number, take: number): Promise<Comment[]> {
-    //     const projet = await projetService.getById(projetId);
-    //     if (projet) {
-    //       return projet.comments;
-    //     }
-    //   }
+    async getComments(projetId: number): Promise<Comment[]> {
+        const projet = await projetService.getById(projetId);
+        if (projet) {
+          return projet.comments;
+        }
+      }
 
     public async createComment(comment: Comment ): Promise<Comment> { 
         const createdComment =  this.commentRepository.save(comment);
