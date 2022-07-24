@@ -142,7 +142,7 @@ export class CommentController {
         if (!projet)
             throw new NotFoundException('Projet not found');
 
-        let comments = await commentService.getComments(Number(projetId));
+        let comments = await commentService.getComments(projet);
         res.status(200).json(comments.map(((comment) => ({ ...comment, projet: comment.projet.id , nbrereplies:comment.replies.length }))));
     }
 

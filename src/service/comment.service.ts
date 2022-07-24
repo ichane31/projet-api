@@ -5,6 +5,7 @@ import {  Injectable, NotFoundException } from '@nestjs/common';
 import  projetService from './projet.service';
 import userService from './user.service';
 import { User } from '../model/user';
+import { Projet } from '../model/projet';
 // import  likesService  from './likes.service';
 
 @Injectable()
@@ -38,11 +39,10 @@ export class CommentService {
             .getMany();
     }
 
-    async getComments(projetId: number): Promise<Comment[]> {
-        const projet = await projetService.getById(projetId);
-        if (projet) {
+    async getComments(projet: Projet): Promise<Comment[]> {
+        
           return projet.comments;
-        }
+        
       }
 
     public async createComment(comment: Comment ): Promise<Comment> { 
