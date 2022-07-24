@@ -13,6 +13,7 @@ import fileService from '../service/file.service';
 import { PutCategoryDTO } from '../dto/put.category.dto';
 import { number } from 'joi';
 import { valideFile } from '../middleware/fileType.middleware';
+import { UnauthorizedError } from '../error/UnauthorizedError.error';
 
 
 @ApiTags('Category')
@@ -128,17 +129,25 @@ export class CategoryController {
             throw new NotFoundException('Category not found');
         }
         let $category = await categoryService.getByName(name);
-        if ($category && category.name != name) {
-            throw new BadRequestException('Category under this name already exists');
-        }
+        // if ($category && category.name != name) {
+        //     throw new BadRequestException('Category under this name already exists');
+        // }
         name && (category.name = name);
         description && (category.description = description);
         if (req.files && req.files.image) {
             let image = req.files.image;
+            if(category.image ) {
             await fileService.delete(category.image);
+            }
+            let $image = {id : null};
+            if(!valideFile("image",image.mimetype,image.size)) {
+                throw new UnauthorizedError('Unauthored file , select png , jpeg ou jpg file');
+               
+            }
             const newImage = new Files();
             newImage.content = image.data;
-            let $image = await fileService.create(newImage);
+            $image = await fileService.create(newImage);
+            
             category.image = $image.id;
         }
 
