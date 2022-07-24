@@ -187,7 +187,7 @@ export class CategoryController {
         if (!category) {
             throw new NotFoundException('Category not found');
         }
-       if (category.image) await fileService.delete(category.image)
+        // await fileService.delete(category.image)
         await categoryService.delete(category.id);
 
         return res.status(200).json({});
