@@ -203,7 +203,7 @@ export class ProjetController {
             throw new NotFoundException('Projet not found');
         }
 
-        await fileService.deleteFiles(projet);
+        // await fileService.deleteFiles(projet);
         
         // const user = await userService.getById(userId);
         // if(! projetService.ensureOwnership(user,projet)) {
