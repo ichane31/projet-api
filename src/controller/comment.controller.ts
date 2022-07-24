@@ -21,6 +21,24 @@ export class CommentController {
     constructor() {
         this.commentRepository = PostgresDataSource.getRepository(Comment);
     }
+
+    @ApiOperation({ description: 'Get a list of comment' })
+    @Get('/')
+    public async getAllComments(req: Request, res: Response) {
+        let comments = await commentService.getAll();
+
+        let $comments = comments.map(comment => {
+            return {
+                ...comment,
+                projet: comment.projet.id,
+                replies: comment.replies,
+                
+            }
+        })
+
+        res.status(200).json($comments);
+    }
+
     
     @ApiOperation({ description: 'Create a new comment' })
     @ApiBody({

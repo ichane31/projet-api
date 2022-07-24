@@ -29,6 +29,10 @@ export class CommentService {
     //         .getMany();
     // }
 
+    public async getAll(): Promise<Comment[]> {
+        return this.commentRepository.find({ relations: ['projet', 'author', 'commentParent' ,'replies'] });
+    }
+
     public async getReplies(parentId: number, page = 1): Promise<Comment[]> {
         return this.commentRepository.createQueryBuilder()
             .innerJoinAndSelect("Comment.commentParent", "Comment")
@@ -46,6 +50,7 @@ export class CommentService {
             .where("Projet.id = :projetId", { projetId })
             .take(25)
             .skip((page - 1) * 25)
+            .orderBy("Comment.createdDate" , "DESC")
             .getMany();
     }
 
