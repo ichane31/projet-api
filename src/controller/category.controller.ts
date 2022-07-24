@@ -134,22 +134,23 @@ export class CategoryController {
         // }
         name && (category.name = name);
         description && (category.description = description);
-        if (req.files && req.files.image) {
-            let image = req.files.image;
-            if(category.image ) {
-            await fileService.delete(category.image);
-            }
-            let $image = {id : null};
-            if(!valideFile("image",image.mimetype,image.size)) {
-                throw new UnauthorizedError('Unauthored file , select png , jpeg ou jpg file');
+        category.image = null;
+        // if (req.files && req.files.image) {
+        //     let image = req.files.image;
+        //     if(category.image ) {
+        //     await fileService.delete(category.image);
+        //     }
+        //     let $image = {id : null};
+        //     if(!valideFile("image",image.mimetype,image.size)) {
+        //         throw new UnauthorizedError('Unauthored file , select png , jpeg ou jpg file');
                
-            }
-            const newImage = new Files();
-            newImage.content = image.data;
-            $image = await fileService.create(newImage);
+        //     }
+        //     const newImage = new Files();
+        //     newImage.content = image.data;
+        //     $image = await fileService.create(newImage);
             
-            category.image = $image.id;
-        }
+        //     category.image = $image.id;
+        // }
 
         const updatedCategory = await categoryService.update(Number(categoryId), category);
 

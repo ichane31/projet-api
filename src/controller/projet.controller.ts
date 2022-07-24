@@ -141,28 +141,34 @@ export class ProjetController {
         // if(! projetService.ensureOwnership(user,projet)) {
         //     throw new UnauthorizedException();
         // }
-        if(req.files) {
-            const {image , resume , rapport , presentation , videoDemo , codeSource} = req.files;
-            await fileService.deleteFiles(projet);
-            projet.image = (await fileService.saveFile("image" , image)).toString();
-            projet.resume = (await fileService.saveFile("resume" , resume)).toString();
-            projet.rapport = (await fileService.saveFile("rapport" , rapport)).toString();
-            projet.presentation = (await fileService.saveFile("presentation" , presentation)).toString();
-            projet.videoDemo = (await fileService.saveFile("video" , videoDemo)).toString();
-            projet.codeSource = (await fileService.saveFile("code" , codeSource)).toString();
+        // if(req.files) {
+        //     const {image , resume , rapport , presentation , videoDemo , codeSource} = req.files;
+        //     await fileService.deleteFiles(projet);
+        //     projet.image = (await fileService.saveFile("image" , image)).toString();
+        //     projet.resume = (await fileService.saveFile("resume" , resume)).toString();
+        //     projet.rapport = (await fileService.saveFile("rapport" , rapport)).toString();
+        //     projet.presentation = (await fileService.saveFile("presentation" , presentation)).toString();
+        //     projet.videoDemo = (await fileService.saveFile("video" , videoDemo)).toString();
+        //     projet.codeSource = (await fileService.saveFile("code" , codeSource)).toString();
 
-        }
-        if (typeof category !== 'undefined') {
-            let $category = await categoryService.getByName(category);
-            if (!$category) {
-                throw new NotFoundException('Cannot find category ' + category);
-            }
-            projet.category = $category;
-        }
+        // }
+        // if (typeof category !== 'undefined') {
+        //     let $category = await categoryService.getByName(category);
+        //     if (!$category) {
+        //         throw new NotFoundException('Cannot find category ' + category);
+        //     }
+        //     projet.category = $category;
+        // }
 
         projet.title = title || projet.title;
         projet.description = description ||projet.description;
         projet.prix = prix || projet.prix
+        projet.image = null;
+        projet.resume = null;
+        projet.rapport = null;
+        projet.presentation = null;
+        projet.videoDemo = null;
+        projet.codeSource = null;
        
 
         const updatedProjet = await projetService.update(Number(projetId), projet);
