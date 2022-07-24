@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { Files } from '../model/files';
 import { valideFile } from '../middleware/fileType.middleware';
 import { Projet } from '../model/projet';
+import { UnauthorizedError } from '../error/UnauthorizedError.error';
 
 @Injectable()
 export class FileService {
@@ -27,12 +28,13 @@ export class FileService {
 
     public async saveFile (type : string , file : any )  {
          
-         if(valideFile(type, file.mimetype, file.size)) {
+         if(! valideFile(type, file.mimetype, file.size)) {
+            throw new UnauthorizedError();
+         }
          const newFile =  new Files();
          newFile.content = file.data;
          let addFile =await this.create(newFile);
          return ( addFile).id;
-         }
     //   return "veuillez bien choisir le fichier";
          
     }
