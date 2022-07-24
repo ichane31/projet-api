@@ -43,7 +43,7 @@ export class ProjetController {
     public async createProjet(req: Request, res: Response) {
         const {title, description,prix , category} = req.body;
         // const {userEmail} = req.body
-        if (!category || title) {
+        if (!category || !title) {
             throw new BadRequestException('Missing required fields');
         }
 

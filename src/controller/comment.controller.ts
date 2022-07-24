@@ -161,7 +161,12 @@ export class CommentController {
             throw new NotFoundException('Projet not found');
 
         let comments = await commentService.getComments(projetId);
-        res.status(200).json(comments);
+        res.status(200).json(comments.map(c => {return {
+            ...c,
+            projet: c.projet.id,
+            nbrereplies: c.replies.length,
+            
+        }}));
     }
 
     @ApiOperation({ description: 'Get a list of replies for a given comment' })
@@ -178,7 +183,7 @@ export class CommentController {
             throw new NotFoundException('Comment not found');
 
         let replies = await commentService.getReplies(Number(parentId));
-        res.status(200).json(replies.map((reply) => ({...reply, projet: reply.projet.id ,reply: reply.replies.length })));
+        res.status(200).json(replies);
     }
 
     @ApiOperation({ description: 'count comment for a given projet' })
@@ -198,22 +203,22 @@ export class CommentController {
         res.status(200).json(count);
     }
 
-    @ApiOperation({ description: 'count reply for a given comment' })
-    @ApiResponse({
-        status: 404,
-        description: 'Comment not found',
-    })
-    @Get('/:commentId/countReplies')
-    public async countReplyByComment(req: Request, res: Response) {
-        const { commentId } = req.params;
-        const comment = await commentService.getById(Number(commentId));/*parseInt*/
+    // @ApiOperation({ description: 'count reply for a given comment' })
+    // @ApiResponse({
+    //     status: 404,
+    //     description: 'Comment not found',
+    // })
+    // @Get('/:commentId/countReplies')
+    // public async countReplyByComment(req: Request, res: Response) {
+    //     const { commentId } = req.params;
+    //     const comment = await commentService.getById(Number(commentId));/*parseInt*/
 
-        if (!comment)
-            throw new NotFoundException('Comment not found');
+    //     if (!comment)
+    //         throw new NotFoundException('Comment not found');
 
-        let count = await commentService.CountReplyByComment(Number(commentId))
-        res.status(200).json(count);
-    }
+    //     let count = await commentService.CountReplyByComment(Number(commentId))
+    //     res.status(200).json(count);
+    // }
 
     @ApiOperation({ description: 'reply on comment' })
     @ApiBody({
@@ -244,8 +249,8 @@ export class CommentController {
         const result = await commentService.createComment(reply)
         
         commentParent.replies.push(result);
-        await this.commentRepository.save(commentParent);
-        res.status(200).json({...result , commentParent : result.commentParent.id} );
+        await commentService.updateComment(commentId,commentParent);
+        res.status(200).json({...result ,projet: result.projet.id, commentParent : result.commentParent.id ,nbrereplies : result.replies.length} );
 
     }
 

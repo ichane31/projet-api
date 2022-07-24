@@ -33,25 +33,13 @@ export class CommentService {
         return this.commentRepository.find({ relations: ['projet', 'author', 'commentParent' ,'replies'] });
     }
 
-    public async getReplies(parentId: number, page = 1): Promise<Comment[]> {
-        return this.commentRepository.createQueryBuilder()
-            .innerJoinAndSelect("Comment.commentParent", "Comment")
-            .leftJoinAndSelect("Comment.author" , "User")
-            .where("Comment.commentParent.id = :parentId", { parentId })
-            .take(25)
-            .skip((page - 1) * 25)
-            .getMany();
+    public async getReplies(parentId: number): Promise<Comment[]> {
+      const commentParent = await this.getById(parentId);
+      return commentParent.replies;
     }
 
-    public async getComments(projetId: number, page: number = 1): Promise<Comment[]> {
-        return this.commentRepository.createQueryBuilder()
-            .leftJoin("Comment.projet", "Projet")
-            .leftJoinAndSelect("Comment.user" , "User.firstname")
-            .where("Projet.id = :projetId", { projetId })
-            .take(25)
-            .skip((page - 1) * 25)
-            .orderBy("Comment.createdDate" , "DESC")
-            .getMany();
+    public async getComments(projetId: number): Promise<Comment[]> {
+        return (await this.getAll()).filter(x => x.projet.id === projetId);
     }
 
 
@@ -88,11 +76,11 @@ export class CommentService {
           
         }
 
-     async CountReplyByComment(commentId: number ): Promise<number> {
-        const comment = this.getById(commentId);
-        return (await comment).replies.length
+    //  async CountReplyByComment(commentId: number ): Promise<number> {
+    //     const comment = this.getById(commentId);
+    //     return (await comment).replies.length
                 
-      }
+    //   }
 
     // async likeComment(token: string, commentId: number): Promise<boolean> {
     //     return await this.likeUnlikeCommentHelper(token, commentId, 'like');

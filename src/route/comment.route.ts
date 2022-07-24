@@ -20,7 +20,7 @@ class CommentRouter {
         this.router.get('/:parentId/Replieslist',commentController.getRepliesByComment);
         this.router.get('/:projetId/count', commentController.countCommentByProjet);
         this.router.post('/:commentId/reply', commentController.replyToComment);
-        this.router.get('/:commentId/countReplies', commentController.countReplyByComment);
+    
     }
 
 }

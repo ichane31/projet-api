@@ -18,23 +18,23 @@ export class Projet extends BaseEntity {
 
     @Column()
     description:string
-
-    @Column()
-    resume:string
-
-    @Column()
-    rapport:string
-
-    @Column()
+    
+    @Column({ nullable: true})
     image: string
 
-    @Column()
+    @Column({ nullable: true})
+    resume:string
+
+    @Column({ nullable: true})
+    rapport:string
+
+    @Column({ nullable: true})
     presentation:string
 
-    @Column()
+    @Column({ nullable: true})
     videoDemo: string
 
-    @Column()
+    @Column({ nullable: true})
     codeSource:string
 
     @Column()
