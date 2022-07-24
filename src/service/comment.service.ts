@@ -39,11 +39,16 @@ export class CommentService {
             .getMany();
     }
 
-    async getComments(projet: Projet): Promise<Comment[]> {
-        
-          return projet.comments;
-        
-      }
+    public async getComments(projetId: number, page: number = 1): Promise<Comment[]> {
+        return this.commentRepository.createQueryBuilder()
+            .leftJoin("Comment.projet", "Projet")
+            .leftJoinAndSelect("Comment.user" , "User.firstname")
+            .where("Projet.id = :projetId", { projetId })
+            .take(25)
+            .skip((page - 1) * 25)
+            .getMany();
+    }
+
 
     public async createComment(comment: Comment ): Promise<Comment> { 
         const createdComment =  this.commentRepository.save(comment);
