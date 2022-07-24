@@ -136,8 +136,8 @@ export class CommentController {
     })
     @Get('/:projetId/list')
     public async getCommentsByProjet(req: Request, res: Response) {
-        const  projetId  = req.params.projetId;
-        const projet = await projetService.getById(Number(projetId));
+        const  projetId  = Number(req.params.projetId);
+        const projet = await projetService.getById(projetId);
 
         if (!projet)
             throw new NotFoundException('Projet not found');
