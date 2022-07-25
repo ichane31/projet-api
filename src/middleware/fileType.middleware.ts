@@ -39,3 +39,14 @@ export const valideFile = (type: string,fileMineType: string , fileSize : number
     
 
 };
+
+export const Errormessage = (type : string) =>{
+    const msg = { image : "please choose a png , jpg , jpeg file and check that it does not exceed 1 Mb" ,
+    resume :"please choose a doc , odt , txt file and check that it does not exceed 20 Mb " ,
+    rapport :"please choose a pdf , doc ,docx ,odt' file and check that it does not exceed 60 Mb ",
+    presentation: "please choose a ppt ,pptx file and check that it does not exceed 60 Mb",
+    video:"please choose a avi , mpeg, ogv ,mp4 file and check that it does not exceed 100 Mb",
+    code: "please choose a zip , rar file and check that it does not exceed 500 Mb"};
+
+return msg[type];
+};

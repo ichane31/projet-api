@@ -51,29 +51,22 @@ export class ProjetController {
         if (!$category) {
             throw new NotFoundException('Cannot find category ' + category);
         }
-        let $image , $resume , $rapport , $presentation , $videoDemo , $code = null;
+        const proj = new Projet();
         if (req.files) {
              
         const {image , resume , rapport , presentation , videoDemo , codeSource} = req.files;
-        $image = fileService.saveFile("image" , image);
-        $resume = fileService.saveFile("resume" , resume);
-        $rapport = fileService.saveFile("rapport" , rapport);
-        $presentation = fileService.saveFile("presentation" , presentation);
-        $videoDemo = fileService.saveFile("video" , videoDemo);
-        $code = fileService.saveFile("code" , codeSource);
+        proj.image = await fileService.saveFile("image" , image);
+        proj.resume =await  fileService.saveFile("resume" , resume);
+        proj.rapport = await  fileService.saveFile("rapport" , rapport);
+        proj.presentation = await fileService.saveFile("presentation" , presentation);
+        proj.videoDemo = await fileService.saveFile("video" , videoDemo);
+        proj.codeSource = await fileService.saveFile("code" , codeSource);
 
         }
 
-        const proj = new Projet()
 
         proj.title = title;
         proj.description = description;
-        proj.resume = $resume;
-        proj.rapport = $rapport;
-        proj.image = $image;
-        proj.presentation = $presentation;
-        proj.videoDemo = $videoDemo;
-        proj.codeSource = $code ;
         proj.prix = prix;
         proj.category = $category;
 
@@ -144,18 +137,18 @@ export class ProjetController {
         if(req.files) {
             const {image , resume , rapport , presentation , videoDemo , codeSource} = req.files;
             await fileService.deleteFiles(projet);
-            projet.image = (await fileService.saveFile("image" , image)).toString();
-            projet.resume = (await fileService.saveFile("resume" , resume)).toString();
-            projet.rapport = (await fileService.saveFile("rapport" , rapport)).toString();
-            projet.presentation = (await fileService.saveFile("presentation" , presentation)).toString();
-            projet.videoDemo = (await fileService.saveFile("video" , videoDemo)).toString();
-            projet.codeSource = (await fileService.saveFile("code" , codeSource)).toString();
+             projet.image = await fileService.saveFile("image" , image);
+            projet.resume = await fileService.saveFile("resume" , resume);
+            projet.rapport = await fileService.saveFile("rapport" , rapport);
+            projet.presentation = await fileService.saveFile("presentation" , presentation);
+            projet.videoDemo = await fileService.saveFile("video" , videoDemo);
+            projet.codeSource = await fileService.saveFile("code" , codeSource);
 
         }
         if (typeof category !== 'undefined') {
             let $category = await categoryService.getByName(category);
             if (!$category) {
-                throw new NotFoundException('Cannot find category ' + category);
+                throw new NotFoundException('Cannot find category ' + category);  
             }
             projet.category = $category;
         }
@@ -167,7 +160,7 @@ export class ProjetController {
 
         const updatedProjet = await projetService.update(Number(projetId), projet);
 
-        return res.status(200).json({ ...updatedProjet,comments: updatedProjet.commentCount, notes: updatedProjet.notes.length });
+        return res.status(200).json({ ...updatedProjet,category: updatedProjet.category.name,comments: updatedProjet.commentCount, notes: updatedProjet.notes.length });
     }
 
     @ApiOperation({ description: 'Delete a projet from the database.' })

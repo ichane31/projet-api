@@ -2,7 +2,7 @@ import { DeleteResult, Repository } from 'typeorm';
 import { PostgresDataSource } from '../config/datasource.config';
 import { Injectable } from '@nestjs/common';
 import { Files } from '../model/files';
-import { valideFile } from '../middleware/fileType.middleware';
+import { Errormessage, valideFile } from '../middleware/fileType.middleware';
 import { Projet } from '../model/projet';
 import { UnauthorizedError } from '../error/UnauthorizedError.error';
 
@@ -28,24 +28,28 @@ export class FileService {
 
     public async saveFile (type : string , file : any )  {
          
+        if(file){
          if(! valideFile(type, file.mimetype, file.size)) {
-            throw new UnauthorizedError();
+            throw new UnauthorizedError(Errormessage(type));
          }
+         
          const newFile =  new Files();
          newFile.content = file.data;
          let addFile =await this.create(newFile);
          return ( addFile).id;
-    //   return "veuillez bien choisir le fichier";
          
+        }
     }
 
     public async deleteFiles ( projet : Projet) {
+        if(projet.image || projet.resume || projet.rapport || projet.presentation || projet.videoDemo || projet.codeSource) {
           await this.delete(projet.image);
           await this.delete(projet.resume);
           await this.delete(projet.rapport);
           await this.delete(projet.presentation);
           await this.delete(projet.videoDemo);
           await this.delete(projet.codeSource);
+        }
     }
 }
 
