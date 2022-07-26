@@ -7,7 +7,13 @@ class FileRouter {
 
     constructor() {
         this.router = Router();
-        
+        this.routes();
+    }
+
+    private routes() {
+        this.router.get(':uuid' , fileController.getFile);
     }
 
 }
+
+export default new FileRouter();

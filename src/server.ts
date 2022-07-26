@@ -20,6 +20,7 @@ import noteRouter from './route/note.router';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
  import  methodOverride from 'method-override';
+import fileRouter from './route/file.router';
 
 export class App {
 
@@ -64,6 +65,7 @@ export class App {
         this._app.use('/api/v1/projet', projetRouter.router);
         this._app.use('/api/v1/comment', commentRouter.router);
         this._app.use('/api/v1/note', noteRouter.router);
+        this._app.use('/api/v1/file' ,fileRouter.router);
 
         this._app.get('/', (req, res) => res.send('welcome to lablib :) <div> <a href="/api/v1/category">start from here</a> </div>  <div> <a href="/docs">read the documentation</a> </div>'));
     }
