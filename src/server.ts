@@ -26,7 +26,7 @@ export class App {
 
     private _app: Application;
     private app: INestApplication;
-    private _origins: string[] = ["http://localhost:3000", "https://admin-lablib.herokuapp.com"];
+    private _origins: string[] = ["http://localhost:3000"];
 
     constructor() {
         

@@ -16,10 +16,12 @@ import { ProjetService } from './service/projet.service';
 import { StepService } from './service/step.service';
 import { NoteService } from './service/note.service';
 import { NoteController } from './controller/note.controller';
+import { FileController } from './controller/file.controller';
+import { FileService } from './service/file.service';
 
 @Module({
-  controllers: [UserController,CategoryController/*, CourseController, ChapterController, LabController, StepController*/,ProjetController,CommentController,NoteController],
-  providers: [CategoryService/*, CourseService, ChapterService, LabService, StepService*/,ProjetService,CommentService,NoteService],
+  controllers: [UserController,CategoryController/*, CourseController, ChapterController, LabController, StepController*/,ProjetController,CommentController,NoteController, FileController],
+  providers: [CategoryService/*, CourseService, ChapterService, LabService, StepService*/,ProjetService,CommentService,NoteService ,FileService],
 })
 
 export class AppModule { } 
