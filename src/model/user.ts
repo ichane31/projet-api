@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, ManyToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, ManyToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Role } from '../types/role.enum';
 import { Lab } from "./lab";
 import { Projet } from "./projet";
@@ -59,6 +59,11 @@ export class User extends BaseEntity {
         projet => projet.favoritedBy,
       )
       favorites: Projet[];
+
+    @CreateDateColumn()
+    createdAt: Date;
+    @UpdateDateColumn()
+    updatedAt: Date;
 
 
 }
