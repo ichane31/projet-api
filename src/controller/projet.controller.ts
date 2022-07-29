@@ -137,7 +137,7 @@ export class ProjetController {
         if(req.files) {
             const {image , resume , rapport , presentation , videoDemo , codeSource} = req.files;
             await fileService.deleteFiles(projet);
-             projet.image = await fileService.saveFile("image" , image);
+            projet.image = await fileService.saveFile("image" , image);
             projet.resume = await fileService.saveFile("resume" , resume);
             projet.rapport = await fileService.saveFile("rapport" , rapport);
             projet.presentation = await fileService.saveFile("presentation" , presentation);
@@ -249,6 +249,13 @@ export class ProjetController {
     }
 
   @ApiOperation({description:'count projet by user'})
+  @ApiParam({
+    name: 'userId',
+    description: 'id of the user',
+    allowEmptyValue: false,
+    type: number,
+    examples: { a: { summary: 'id of the user is 5', value: 5 } }
+})
   @ApiResponse({
       schema: {
           example: 2

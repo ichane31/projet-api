@@ -128,10 +128,12 @@ export class CategoryController {
         if (!category) {
             throw new NotFoundException('Category not found');
         }
-        let $category = await categoryService.getByName(name);
-        // if ($category && category.name != name) {
-        //     throw new BadRequestException('Category under this name already exists');
-        // }
+        if (name) {
+            let $category = await categoryService.getByName(name);
+            if ($category && category.name != name) {
+                throw new BadRequestException('Category under this name already exists');
+            }
+        }
         name && (category.name = name);
         description && (category.description = description);
         if (req.files && req.files.image) {
@@ -187,7 +189,9 @@ export class CategoryController {
         if (!category) {
             throw new NotFoundException('Category not found');
         }
-        // await fileService.delete(category.image)
+        if(category.image){
+            await fileService.delete(category.image)
+        }
         await categoryService.delete(category.id);
 
         return res.status(200).json({});
