@@ -30,8 +30,8 @@ export class CommentController {
         let $comments = comments.map(comment => {
             return {
                 ...comment,
-                projet: comment.projet.id,
-                nbrereplies: comment.replies.length,
+                projet: comment.projet?.id,
+                nbrereplies: comment.replies?.length,
                 commentParent : comment.commentParent?.id
             }
         })

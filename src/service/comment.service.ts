@@ -38,7 +38,7 @@ export class CommentService {
     }
 
     public async getComments(projetId: number): Promise<Comment[]> {
-        return (await this.getAll()).filter(x => x.projet.id === projetId);
+        return (await this.getAll()).filter(x => x.projet?.id === projetId);
     }
 
 
