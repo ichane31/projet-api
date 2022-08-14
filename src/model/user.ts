@@ -4,6 +4,7 @@ import { Lab } from "./lab";
 import { Projet } from "./projet";
 import { Comment } from "./comment";
 import { Note } from "./note";
+import {Device} from "./device";
 @Entity()
 export class User extends BaseEntity {
     @PrimaryGeneratedColumn()
@@ -16,7 +17,9 @@ export class User extends BaseEntity {
     email: string
     @Column()
     password: string
-    @Column()
+    @Column({
+        nullable:true
+    })
     image: string
 	@Column({
 		type: 'enum',
@@ -59,6 +62,18 @@ export class User extends BaseEntity {
         projet => projet.favoritedBy,
       )
       favorites: Projet[];
+
+    @ManyToMany(
+        type => Comment,
+        comment => comment.likedBy,
+      )
+      likes: Comment[];
+
+    @OneToMany(
+        () => Device,
+        device => device.user
+    )
+    devices: Device[];
 
     @CreateDateColumn()
     createdAt: Date;

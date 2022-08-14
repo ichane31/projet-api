@@ -7,7 +7,7 @@ import jwtService from '../service/jwt.service';
 import passwordService from '../service/password.service';
 import { Role } from '../types/role.enum';
 import { Controller, Delete, Get, Post, Put } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NotFoundException } from '../error/NotFoundException.error';
 import emailService from '../service/email.service';
 import { IUser } from '../types/user.interface';
@@ -17,6 +17,12 @@ import { IPasswordPayload } from '../types/passwordpayload.interface';
 import path from 'path';
 import { Files } from '../model/files';
 import fileService from '../service/file.service';
+import { PostUserDTO } from '../dto/post.user.dto';
+import { PutUserDTO } from '../dto/put.user.dto';
+import { LoginDTO } from '../dto/login.dto';
+import { IEmail } from '../types/email.interface';
+import deviceService from '../service/device.service';
+import { Device } from '../model/device'
 
 
 @ApiTags('User')
@@ -36,17 +42,63 @@ export class UserController {
 			password: undefined,
 			//active: req.currentUser.role == Role.ADMIN ? user.active : undefined,
 			//createdAt: req.currentUser.role == Role.ADMIN ? user.createdAt : undefined,
-			updatedAt: undefined
+			updatedAt: undefined,
+			favorites: undefined,
+			likes : undefined,
+		})));
+	}
+
+	@Get('/active')
+	@ApiOperation({ description: 'get the list of active users' })
+	public async allActiveUsers(req: Request, res: Response) {
+		res.status(200).json((await userService.getAll()).filter(x => {
+			return (new Date()).getTime() - x.active.getTime() < 24 * 60 * 60 * 1000;
+		}).map((user) => ({
+			...user,
+			password: undefined,
+			//active: req.currentUser.role == Role.ADMIN ? user.active : undefined,
+			//createdAt: req.currentUser.role == Role.ADMIN ? user.createdAt : undefined,
+			updatedAt: undefined,
+			favorites: undefined,
+			likes: undefined
+		})));
+	}
+
+	@Get('/joined')
+	@ApiOperation({ description: 'get the list of recently joined users' })
+	public async allJoinedUsers(req: Request, res: Response) {
+		res.status(200).json((await userService.getAll()).filter(x => {
+			return (new Date()).getTime() - x.createdAt.getTime() < 24 * 60 * 60 * 1000;
+		}).map((user) => ({
+			...user,
+			password: undefined,
+			//active: req.currentUser.role == Role.ADMIN ? user.active : undefined,
+			//createdAt: req.currentUser.role == Role.ADMIN ? user.createdAt : undefined,
+			updatedAt: undefined,
+			favorites: undefined,
+			likes: undefined
 		})));
 	}
 
 	@Post('/')
+	@ApiBody({
+		type: PostUserDTO,
+		description: 'user credentials',
+	})
 	@ApiOperation({ description: 'request an email verification link to create new user account', })
 	public async create(req: Request, res: Response) {
 		const { email, password, firstname, lastname } = req.body;
 
 		if (!email || !password || !firstname || !lastname) {
 			throw new BadRequestException('Missing required fields');
+		}
+
+		if (!/^[\w\-\.]+@[\w\-]+\.[\.a-z]+$/.test(email.trim().toLowerCase())) {
+			throw new BadRequestException(`email ${email} must be a valid email address`);
+		}
+
+		if (password.length < 8 || /^[\w]+$/.test(password)) {
+			throw new BadRequestException(`password must be at least 8 characters long with one special character at least`);
 		}
 
 		if (await userService.getByEmail(email)) {
@@ -61,7 +113,7 @@ export class UserController {
 		await emailService.sendMail(
 			htmlService.createLink(link, 'Verify your account'),
 			email,
-			'Verify your LabLib registration');
+			'Verify your labLib_Projets registration');
 		res.status(200).json({ message: "email sent" });
 	}
 
@@ -131,6 +183,27 @@ export class UserController {
 		res.status(200).sendFile(path.join(__dirname, '../../static/passwordreset.html'));
 	}
 
+	@Get('/changeemail/:token')
+	@ApiOperation({ description: '(expirimental feature) get access to reset your password' })
+	public async changeEmail(req: Request, res: Response) {
+		let { token } = req.params, body: IEmail;
+		try {
+			body = jwtService.verifyEmail(token);
+
+		} catch (err) {
+			throw new BadRequestException('Invalid token');
+		}
+
+		let { id } = body;
+		const user = await userService.getById(id);
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
+		user.email = body.email;
+		let updatedUser = userService.update(id, user);
+		res.status(200).json({ message: 'Email updated successfully' });
+	}
+
 	@Post('/resetpassword/:token')
 	@ApiOperation({ description: 'request to change password via link sent to the email' })
 	public async getPassword(req: Request, res: Response) {
@@ -157,18 +230,22 @@ export class UserController {
 	@ApiOperation({ description: 'get information about a specific user' })
 	public async userById(req: Request, res: Response) {
 		const userId = Number(req.params.userId);
-		res.status(200).json({ ...await userService.getById(userId), password: undefined });
+		res.status(200).json({ ...await userService.getById(userId), password: undefined, favorites: undefined });
 	}
 
 	@Post('/login')
+	@ApiBody({
+		type: LoginDTO,
+		description: 'informations to authenticate user',
+	})
 	@ApiOperation({ description: 'authentication as a specific user' })
 	public async login(req: Request, res: Response) {
-		const { email, password } = req.body;
+		const { email, password, device } = req.body;
 
 		const user = await userService.getByEmail(email);
 
 		if (!user) {
-			throw new BadRequestException('Invalid credentials');
+			throw new BadRequestException('Invalid user');
 		}
 
 		const isPasswordValid = await passwordService.comparePassword(
@@ -177,40 +254,62 @@ export class UserController {
 		);
 
 		if (!isPasswordValid) {
-			throw new BadRequestException('Invalid credentials');
+			throw new BadRequestException('Invalid password');
 		}
 
-		req.session.access_token = jwtService.sign({
+		const token = jwtService.sign({
 			userId: user.id,
 			role: user.role as Role
 		});
 
-		// req.sessionOptions.expires = moment().add(1, 'day').toDate();
-		// /*const token = jwtService.sign({
-		// 	userId: user.id,
-		// 	role: user.role as Role
-		// });
-		// res.cookie("Authorization", "Bearer " + token, {
-		// 	httpOnly: true,
-		// 	maxAge: 3600000,
-		// 	sameSite: "none",
-		// 	secure: true,
-		// });*/
+		/*req.session.access_token = token;
+		req.sessionOptions.expires = moment().add(1, 'day').toDate();
+		res.cookie("Authorization", "Bearer " + token, {
+			httpOnly: true,
+			maxAge: 3600000,
+			sameSite: "none",
+			secure: true
+		});*/
+
 		user.active = new Date();
+
+		if (device) {
+			let $device = await deviceService.getByDevice(device);
+			if ($device)
+				throw new BadRequestException('Your device is already in use. log out first');
+			let _device = new Device();
+			_device.identifier = device;
+			_device.user = user;
+			_device.token = token;
+			await deviceService.create(_device);
+		}
+
 		await userService.update(user.id, user);
-		res.status(200).json({ ...user, password: undefined });
+		res.status(200).json({ ...user, password: undefined, favorites: undefined, likes: undefined, token });
 	}
+
 	@Post('/logout')
 	@ApiOperation({ description: 'close the session' })
 	public async logout(req: Request, res: Response) {
-		req.session.access_token = undefined;
+		/*req.session.access_token = undefined;
+		res.clearCookie('Authorization');*/
+		if (req.headers['authorization']) {
+			let h = req.headers['authorization'];
+			let [type, token] = h.split(' ');
+			if (type == 'Device') {
+				let device = await deviceService.getByDevice(token);
+				if (!device) throw new NotFoundException('Unknown device');
+				await deviceService.delete(device.id);
+			}
+		}
 		res.status(200).json();
 	}
+
 	@Get('/me/details')
 	@ApiOperation({ description: 'get detailed informations about the current user' })
 	public async details(req: Request, res: Response) {
 		const user = await userService.getById(req.currentUser?.userId!);
-		const userNoPassword = { ...user, password: undefined };
+		const userNoPassword = { ...user, password: undefined, favorites: user.favorites?.length , likes: user.likes?.length };
 		res.status(200).json(userNoPassword);
 	}
 
@@ -254,26 +353,45 @@ export class UserController {
 		res.status(200).json((await userService.getAll()).map((user) => ({ ...user, password: undefined })).filter(x => (x.role === Role.USER)));
 	}
 
+
 	@Put('/me')
+	@ApiBody({
+		type: PutUserDTO,
+		description: 'infos to be updated',
+	})
 	@ApiOperation({ description: 'update information about the current user' })
 	public async updateCurrentUser(req: Request, res: Response) {
 		const { email, firstname, lastname, password, currentPassword } = req.body;
 		const user = await userService.getById(req.currentUser.userId);
+
 		let isPasswordValid = await passwordService.comparePassword(currentPassword, user.password);
 		if (!isPasswordValid) {
 			throw new BadRequestException('Invalid password');
 		}
+
 		firstname && (user.firstname = firstname);
 		lastname && (user.lastname = lastname);
+
 		if (email && user.email != email) {
+			if (!/^[\w\-\.]+@[\w\-]+\.[\.a-z]+$/.test(email.trim().toLowerCase())) {
+				throw new BadRequestException(`email ${email} must be a valid email address`);
+			}
+
 			let isUsed = await userService.getByEmail(email);
 			if (isUsed) throw new BadRequestException('Email already in use');
-			user.email = email;
-
+			//user.email = email;
+			let token = await jwtService.signEmail({
+				id: user.id,
+				email
+			});
+			emailService.sendMail(htmlService.createLink(config.origin + 'api/v1/user/changeemail/' + token, 'click to change your email address'), email, 'Change Password For Your LabLib Account');
 			//sign new email address with user id and send it to the email
 		}
-		if (password)
+		if (password) {
+			if (password.length < 8 || /^[\w]+$/.test(password))
+				throw new BadRequestException(`password must be at least 8 characters long with one special character at least`);
 			user.password = await passwordService.hashPassword(password);
+		}
 
 		if (req.files && req.files.image) {
 			let image = req.files.image;
@@ -304,11 +422,10 @@ export class UserController {
 	}
 
 	@Get('/test/otp')
-	@ApiOperation({ description: '(expirimensional feature) generate an OneTimePassword' })
+	@ApiOperation({ description: '(expirimensional feature) generate OneTimePassword' })
 	public async getOTP(req: Request, res: Response) {
 		let d = 30;
 		res.status(200).json({
-
 			resetIn: (d - ((new Date()).getTime() % (d * 1000)) / 1000) + 's',
 			otp_prev: jwtService.getOTP(req.body.key || 'test', 30, -15),
 			otp: jwtService.getOTP(req.body.key || 'test', 30, 0),
@@ -316,6 +433,31 @@ export class UserController {
 
 		})
 	}
-}
+
+	@Get('/me/device')
+	@ApiOperation({ description: '(expirimensional feature) get online devices' })
+	public async getDevices(req: Request, res: Response) {
+		let { userId } = req.currentUser;
+		let device = req.device || null;
+		let devices = (await userService.getById(userId)).devices?.map(x => {
+			return {
+				id: x.id, loggedIn: x.createdAt, thisDevice: x.id === device
+			}
+		});
+		res.status(200).json(devices);
+	}
+
+	@Delete('/me/device/:id')
+	@ApiOperation({ description: '(expirimensional feature) remove online device' })
+	public async removeDevice(req: Request, res: Response) {
+		let { userId } = req.currentUser;
+		let { id } = req.params;
+		let device = await deviceService.getById(id);
+		if (!device) throw new NotFoundException('Not found device');
+		if (device.user.id !== userId) throw new NotFoundException('this device is not linked to your account');
+		res.status(200).json(await deviceService.delete(device.id));
+	}
+	
+	}
 
 export default new UserController();

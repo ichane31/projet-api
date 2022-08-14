@@ -1,5 +1,6 @@
 import { Router } from "express";
 import commentController from "../controller/comment.controller";
+import { ensureAuthenticated } from "../middleware/ensureAuthenticated.middleware";
 
 class CommentRouter {
     public router: Router; 
@@ -20,6 +21,8 @@ class CommentRouter {
         this.router.get('/:parentId/Replieslist',commentController.getRepliesByComment);
         this.router.get('/:projetId/count', commentController.countCommentByProjet);
         this.router.post('/:commentId/reply', commentController.replyToComment);
+        this.router.post('/:commentId/like', ensureAuthenticated, commentController.addCommentToLikes);
+        this.router.delete('/:commentId/dislike', ensureAuthenticated, commentController.removeCommentFromLikes);
     
     }
 

@@ -24,7 +24,7 @@ export class EmailService {
 
     public async sendMail(email: any, toEmail: string, subject: string) {
         let options = {
-            from: 'lablibbot@zohomail.com',
+            from: 'ichaneapis@zohomail.com',
             to: toEmail,
             subject: subject,
             html: email

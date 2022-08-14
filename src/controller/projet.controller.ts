@@ -18,7 +18,8 @@ export class ProjetController {
     @ApiOperation({description: 'Get list of projet'})
     @Get('/')
     public async getProjets(req: Request, res: Response) {
-        res.status(200).json((await projetService.getAllProjet()).map((projet) => ({ ...projet,category :projet.category.name, Comments: projet.comments.length, notes: projet.notes.length })));
+        let defaultImage = await fileService.getDefaultImage();
+        res.status(200).json((await projetService.getAllProjet()).map((projet) => ({ ...projet,category :projet.category.name, Comments: projet.comments.length, notes: projet.notes.length ,image :projet.image || defaultImage })));
     }
 
     @ApiOperation({ description: 'Create a new projet' })
@@ -42,7 +43,7 @@ export class ProjetController {
     @Post('/')
     public async createProjet(req: Request, res: Response) {
         const {title, description,prix , category} = req.body;
-        // const {userEmail} = req.body
+        // const {userId} = req.body
         if (!category || !title) {
             throw new BadRequestException('Missing required fields');
         }
@@ -71,7 +72,8 @@ export class ProjetController {
         proj.category = $category;
 
         const newProjet = await projetService.createProj(proj/*,userEmail*/);
-        res.status(201).json({ ...newProjet, category: proj.category.name });
+        let defaultImage = await fileService.getDefaultImage();
+        res.status(201).json({ ...newProjet, category: proj.category.name , comments:0, notes: 0, image: proj.image || defaultImage});
 
 
     }
@@ -95,11 +97,13 @@ export class ProjetController {
         if(!projet) {
             throw new NotFoundException('Projet not found')
         }
+        let defaultImage = await fileService.getDefaultImage();
 
         res.status(200).json({ ... projet,
         category: projet.category.name,
         Comments :projet.commentCount,
-        Notes: projet.notes.length});
+        Notes: projet.notes.length,
+        image: projet.image || defaultImage});
     }
 
     @ApiOperation({ description: 'Modify a projet' })
@@ -219,7 +223,7 @@ export class ProjetController {
     @Get('/count')
     async Count(req: Request , res: Response) {
    
-        let nbre = await projetService.getCount();
+        let nbre = await projetService.count();
         res.status(200).json(nbre);
     
   }
@@ -333,8 +337,10 @@ export class ProjetController {
       }
 
       const user = await userService.getById(userId);
+      if(!user) { throw new NotFoundException('Invalid user');}
 
       const favProjet = await projetService.favoriteProjet(projetId, user);
+      await userService.update(userId , user);
       return res.status(200).json({ ...favProjet,comments: favProjet.commentCount, notes: favProjet.notes.length, favorites: favProjet.favoritesCount });
     
   }
@@ -367,11 +373,66 @@ public async unfavoriteProjet(req: Request , res: Response){
     }
 
     const user = await userService.getById(userId);
+    if(!user) {
+        throw new NotFoundException('User not found');
+      }
     const unfavProjet = await projetService.unfavoriteProjet(projetId, user);
+    await userService.update(userId, user);
       return res.status(200).json({ ...unfavProjet,comments: unfavProjet.commentCount, notes: unfavProjet.notes.length, favorites: unfavProjet.favoritesCount });
 
 }
 
+@ApiOperation({ description: 'Get a list of last added projets' })
+    @Get('/latest/:count')
+    public async getlatestProjets(req: Request, res: Response) {
+        const { count } = req.params;
+        const projets = await projetService.getCount(Number(count));
+        res.status(200).json(projets.map(projet => { return { ...projet ,category: projet.category.name , Comments: projet.commentCount , notes: projet.notes.length}}))
+    }
+
     
+@ApiOperation({ description: 'Get a list of favorites projets' })
+@Get('/favorites/:count')
+public async getFavoriteProjets(req: Request, res: Response) {
+    const { count } = req.params;
+    let { userId } = req.currentUser;
+    let user = await userService.getById(userId);
+    if (!user) {
+        throw new NotFoundException('Invalid user');
+    }
+    const projets = (user.favorites || []).slice(0 ,Number(count));
+    res.status(200).json(projets.map(projet => { return {...projet,category: projet.category.name, comments: projet.commentCount, notes: projet.notes.length }}));
+}
+
+@ApiOperation({ description: 'Get a list of recommendations for a projet' })
+    @Get('/suggestions/:count')
+    public async getSuggestions(req: Request, res: Response) {
+        const { count } = req.params;
+        let { userId } = req.currentUser;
+        let user = await userService.getByIdWithDeepFavoriteBy(userId);
+        if (!user) {
+            throw new NotFoundException('Invalid user');
+        }
+        const projets = user.favorites.map(p => p.favoritedBy.map(f => f.favorites.map($ => $.id))).flat(2);
+        let i = [], cs = [];
+        projets.forEach(c => {
+            if (!(cs.includes(c))) { i.push(0); cs.push(c); }
+            i[cs.indexOf(c)] += 1;
+        });
+
+        let used = user.favorites.map(c => c.id), max = 0, mxi;
+        for (let y of cs) {
+            for (let j of cs) {
+                if (used.includes(j)) continue;
+                let $ = i[cs.indexOf(j)];
+                if ($ > max) { max = $; mxi = j; }
+            }
+            used.push(mxi);
+            if (used.length - user.favorites.length == Number(count)) break;
+        }
+
+        res.status(200).json(used.slice(user.favorites.length));
+    }
+
 }
 export default new ProjetController();

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import projetController from "../controller/projet.controller";
+import { ensureAuthenticated} from '../middleware/ensureAuthenticated.middleware';
 
 class ProjetRouter {
 
@@ -13,6 +14,8 @@ class ProjetRouter {
     private routes() {
         this.router.get('/', projetController.getProjets);
         this.router.post('/', projetController.createProjet);
+        this.router.get('/latest/:count', projetController.getlatestProjets);
+        this.router.get('/suggestions/:count' , ensureAuthenticated , projetController.getSuggestions);
         this.router.get('/:projetId', projetController.projetById);
         this.router.put('/:projetId', projetController.updateProjet);
         this.router.delete('/:projetId', projetController.deleteProjet);
@@ -20,6 +23,9 @@ class ProjetRouter {
         this.router.get('/:categoryId/count', projetController.getCountByCategory);
         this.router.get('/:userId/count', projetController.getCountByUser);
         this.router.get('/:userId/list', projetController.allProjetsByUser);
+        this.router.get('/favorites/:count' , ensureAuthenticated , projetController.getFavoriteProjets);
+        this.router.post('/:projetId/favorite' , ensureAuthenticated , projetController.favoriteProjet);
+        this.router.delete('/:projetId/unfavorite' , ensureAuthenticated , projetController.unfavoriteProjet)
     }
 
 }

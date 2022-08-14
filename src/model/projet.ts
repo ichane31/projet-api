@@ -86,7 +86,11 @@ export class Projet extends BaseEntity {
         user => user.favorites,
         { eager: true },
       )
-      @JoinTable()
+      @JoinTable({
+        name: 'favorites',
+        inverseJoinColumn: {name: 'user' , referencedColumnName: 'id'},
+        joinColumn: {name: 'projet' , referencedColumnName: 'id'}
+      })
       favoritedBy: User[];
     
       @RelationCount((projet: Projet) => projet.favoritedBy)

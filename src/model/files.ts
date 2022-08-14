@@ -8,6 +8,10 @@ export class Files extends BaseEntity {
         type: 'bytea'
     })
     content: Buffer
+    @Column({default: false}) 
+    isDefault: boolean
+    @Column({default: null}) 
+    original_name: string
     @CreateDateColumn()
     createdAt: Date;
     @UpdateDateColumn()

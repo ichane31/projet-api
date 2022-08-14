@@ -3,8 +3,6 @@ import courseService from './course.service'
 import chapterService from './chapter.service'
 import { Injectable } from '@nestjs/common';
 import { Category } from '../model/category';
-import { Course } from '../model/course';
-import { Chapter } from '../model/chapter';
 import { Projet } from '../model/projet';
 import projetService from './projet.service';
 

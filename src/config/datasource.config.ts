@@ -11,18 +11,20 @@ import { Projet } from '../model/projet';
 import { Comment } from '../model/comment';
 import { Note } from '../model/note';
 import { Files } from '../model/files';
-
+import {SessionContainer} from '../model/session';
+import {Device} from '../model/device';
+ 
 
 const PostgresDataSource = new DataSource({
 	name: 'default',
 	type: 'postgres',
 	url: config.DB_URL,
-	entities: [User, Lab, Category, Course, Chapter, Step, Projet,Comment,Note ,Files],
-	synchronize: true,
+	entities: [User, Lab, Category, Course, Chapter, Step, Projet,Comment,Note ,Files , Device , SessionContainer],
 	ssl: config.NODE_ENV == 'development' ? undefined : {
 		rejectUnauthorized: false
 	},
 	namingStrategy: new SnakeNamingStrategy(),
+	synchronize : true
 });
 
 export { PostgresDataSource };

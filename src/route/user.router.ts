@@ -21,9 +21,20 @@ class AdminRouter {
 		);
 
 		this.router.get(
+			'/active',
+			userController.allActiveUsers
+		);
+
+		this.router.get(
+			'/joined',
+			userController.allJoinedUsers
+		);
+
+		this.router.get(
 			'/resetpassword',
 			userController.resetPassword
 		);
+
 		this.router.get(
 			'/resetpassword/:token',
 			userController.resetPasswordPage
@@ -31,6 +42,11 @@ class AdminRouter {
 		this.router.post(
 			'/resetpassword/:token',
 			userController.getPassword
+		);
+
+		this.router.get(
+			'/changeemail/:token',
+			userController.changeEmail
 		);
 
 		this.router.get(
@@ -51,6 +67,14 @@ class AdminRouter {
 			userController.details
 		);
 
+		this.router.get('/me/device',
+			ensureAuthenticated,
+			userController.getDevices);
+
+		this.router.delete('/me/device/:id',
+			ensureAuthenticated,
+			userController.removeDevice);
+
 		this.router.post(
 			'/',
 			userController.create
@@ -60,30 +84,30 @@ class AdminRouter {
 			'/verify/:token',
 			userController.verifyEmail
 		);
-		
+
 		this.router.post('/login', ensureNotLoggedIn, userController.login);
-		this.router.get('/logout', userController.logout);
-		
+		this.router.post('/logout', ensureAuthenticated, userController.logout);
+
 		this.router.get('/role/user',
 			ensureAuthenticated,
 			ensureAccessLevel(Role.ADMIN),
 			userController.getRoleUser);
-		
+
 		this.router.get('/role/admin',
 			ensureAuthenticated,
 			ensureAccessLevel(Role.ADMIN),
 			userController.getRoleAdmin);
-		
+
 		this.router.put('/:userId/promote',
 			ensureAuthenticated,
 			ensureAccessLevel(Role.ADMIN),
 			userController.promote);
-		
+
 		this.router.put('/:userId/demote',
 			ensureAuthenticated,
 			ensureAccessLevel(Role.ADMIN),
 			userController.demote);
-		
+
 		this.router.get(
 			'/:userId',
 			ensureAuthenticated,

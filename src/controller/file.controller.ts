@@ -23,5 +23,20 @@ export class FileController {
         res.status(200).send(file.content);
     }
 
+    @ApiOperation({ description: 'Get the requested file.' })
+    @ApiOkResponse({
+        description: 'Get a file given uuid',
+        type: String,
+    })
+    @Get('/:uuid/original_name')
+    public async getFileOriginal_Name(req: Request, res: Response) {
+        const { uuid } = req.params;
+        let file = await fileService.getById(uuid);
+        if (!file) {
+            throw new NotFoundException('file not found');
+        }
+        res.status(200).json(file.original_name);
+    }
+
 }
 export default new FileController();

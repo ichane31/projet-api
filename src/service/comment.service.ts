@@ -34,8 +34,7 @@ export class CommentService {
     }
 
     public async getReplies(parentId: number): Promise<Comment[]> {
-      const commentParent = await this.getById(parentId);
-      return commentParent.replies;
+        return (await this.getAll()).filter(x => x.commentParent?.id === parentId);
     }
 
     public async getComments(projetId: number): Promise<Comment[]> {
@@ -82,22 +81,7 @@ export class CommentService {
                 
     //   }
 
-    // async likeComment(token: string, commentId: number): Promise<boolean> {
-    //     return await this.likeUnlikeCommentHelper(token, commentId, 'like');
-    //   }
-    // likeUnlikeCommentHelper(token: string, commentId: number, type: 'like' | 'unlike',): boolean | PromiseLike<boolean> {
     
-    // const user = await this.authService.getUserFromSessionToken(token);
-
-    // const comment =  this.getById(commentId);
-    // if (!comment) {
-    //   throw new NotFoundException('Comment not found');
-    // }
-
-    // return type === 'like'
-    /*   ?   likesService.likeComment(comment, user)*/
-    //   :   likesService.unlikeComment(commentId, user.id);
-    // }
 
 }
 

@@ -12,6 +12,7 @@ class FileRouter {
 
     private routes() {
         this.router.get('/:uuid' , fileController.getFile);
+        this.router.get('/:uuid/original_name' , fileController.getFileOriginal_Name);
     }
 
 }

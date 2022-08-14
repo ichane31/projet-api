@@ -15,15 +15,9 @@ export class ProjetService {
         this.projetRepository = PostgresDataSource.getRepository(Projet);
     }
 
-   async getCount(): Promise<number> {
-    const ProjetsCount = await this.projetRepository
-       .createQueryBuilder()
-       .leftJoin("Projet.category","Category")
-       .leftJoin("Projet.comments","Comments")
-       .leftJoin("Projet.author", "User")
-       .leftJoin("Projet.notes","Note")
-       .getCount();
-       return ProjetsCount;
+   async getCount(count : number): Promise<Projet[]> {
+      return this.projetRepository.find({relations:['category ','author' ,'comments' , 'notes'] ,
+     order :{'createdAt' :'DESC'} , take : count});
       }
 
     async count(): Promise<number> {
@@ -67,7 +61,7 @@ export class ProjetService {
             );
     }
 
-    async getProjetByTitle(
+    public async getProjetByTitle(
         title: string,
     ): Promise<Projet[]> {
         return this.projetRepository.find({where:{title}})
@@ -117,23 +111,25 @@ export class ProjetService {
             .getMany();
     }
 
-    async favoriteProjet(
+    public async favoriteProjet(
         id: number,
         user: User,
       ): Promise<Projet> {
         const projet = await this.getById(id);
         projet.favoritedBy.push(user);
-        await projet.save();
+        user.favorites.push(projet);
+        this.update(id, projet);
         return (await this.getById(id) );
       }
 
-      async unfavoriteProjet(
+    public async unfavoriteProjet(
         id: number,
         user: User,
       ): Promise<Projet> {
         const projet = await this.getById(id);
         projet.favoritedBy = projet.favoritedBy.filter(fav => fav.id !== user.id);
-        await projet.save();
+        user.favorites = user.favorites.filter(favorite => favorite.id !== projet.id);
+        this.update(id ,projet);
         return (await this.getById(id));
       }
 

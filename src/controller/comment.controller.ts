@@ -32,7 +32,7 @@ export class CommentController {
                 ...comment,
                 projet: comment.projet.id,
                 nbrereplies: comment.replies.length,
-                
+                commentParent : comment.commentParent?.id
             }
         })
 
@@ -48,9 +48,10 @@ export class CommentController {
     @Post('/:projetId')
     public async createComment(req: Request, res: Response) {
         const { body } = req.body;
-        const {projetId /*, userEmail*/} = req.params
+        const {projetId } = req.params;
+        // const { userId} = req.currentUser;
 
-        if (!projetId || !body/*|| !userEmail*/) {
+        if (!projetId || !body/*|| !userId*/) {
             throw new BadRequestException('Missing required fields');
         }
 
@@ -58,15 +59,17 @@ export class CommentController {
         if (!$projet) {
             throw new NotFoundException('Cannot find projet ' + projetId);
         }
-        // let $user = await userService.getByEmail(userEmail);
+        // let $user = await userService.getById(userId);
         const comment = new Comment();
 
         // comment.author = $user;
         comment.body = body;
         comment.projet = $projet;
+        $projet.comments.push(comment);
+        await projetService.update(Number(projetId),$projet);
         const newComment = await commentService.createComment(comment);
 
-        res.status(201).json({ ...newComment, projet: comment.projet.id });
+        res.status(201).json({ ...newComment, projet: comment.projet.id , author: comment.author.firstname});
     }
 
     @ApiOperation({ description: 'Get details of a comment' })
@@ -83,7 +86,7 @@ export class CommentController {
             throw new NotFoundException('Comment not found');
         }
 
-        res.status(200).json({ ...comment , projet: comment.projet.id , nbrereplies : comment.replies.length});
+        res.status(200).json({ ...comment , projet: comment.projet.id , nbrereplies : comment.replies.length , commentaireParent : comment.commentParent.id});
     }
 
     @ApiOperation({ description: 'Modify a comment' })
@@ -127,7 +130,7 @@ export class CommentController {
     @Delete('/:commentId')
     public async deleteComment(req: Request, res: Response) {
         const { commentId } = req.params;
-        // const userId = req.currentUser.userId;
+        // const {userId} = req.currentUser;
 
         const comment = await commentService.getById(Number(commentId));
 
@@ -183,7 +186,7 @@ export class CommentController {
             throw new NotFoundException('Comment not found');
 
         let replies = await commentService.getReplies(Number(parentId));
-        res.status(200).json(replies);
+        res.status(200).json(replies.map(r => {return {...r , projet :r.projet.id ,commentParent : r.commentParent.id , replies: r.replies , nbrereplies:r.replies?.length}}));
     }
 
     @ApiOperation({ description: 'count comment for a given projet' })
@@ -228,8 +231,8 @@ export class CommentController {
     @Post('/:commentId/reply')
     public async replyToComment(req: Request, res: Response) {
         const { body } = req.body;
-        const commentId /*, userEmail*/ = Number(req.params.commentId);
-        // const userId = req.currentUser.userId
+        const commentId  = Number(req.params.commentId);
+        // const {userId} = req.currentUser;
 
         if (!commentId /*|| !userId*/) {
             throw new BadRequestException('Missing required fields');
@@ -252,6 +255,58 @@ export class CommentController {
         await commentService.updateComment(commentId,commentParent);
         res.status(200).json({...result ,projet: result.projet.id, commentParent : result.commentParent.id ,nbrereplies : result.replies.length} );
 
+    }
+
+    @ApiOperation({ description: 'Add comment to likes.' })
+    @ApiResponse({
+        status: 404,
+        description: 'Comment not found',
+    })
+    @Post('/:commentId/like')
+    public async addCommentToLikes(req: Request, res: Response) {
+        const { commentId } = req.params;
+        const { userId } = req.currentUser;
+        let user = await userService.getById(userId);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const comment = await commentService.getById(Number(commentId));
+        if (!comment) {
+            throw new NotFoundException('Comment not found');
+        }
+        user.likes.push(comment);
+        comment.likedBy.push(user);
+        await commentService.updateComment(Number(commentId),comment);
+        await userService.update(userId , user);
+        return res.status(200).json({});
+    }
+
+    @ApiOperation({ description: 'Remove a comment from likes.' })
+    @ApiResponse({
+        status: 404,
+        description: 'Comment not found',
+    })
+    @Delete('/:commentId/dislike')
+    public async removeCommentFromLikes(req: Request, res: Response) {
+        const { commentId } = req.params;
+        const { userId } = req.currentUser;
+        let user = await userService.getById(userId);
+        if (!user) {
+            throw new NotFoundException('user not found');
+        }
+
+        const comment = await commentService.getById(Number(commentId));
+
+        if (!comment) {
+            throw new NotFoundException('Comment not found');
+        }
+
+        user.likes = user.likes.filter(like => like.id !== comment.id);
+        comment.likedBy = comment.likedBy.filter(lik => lik.id !== user.id);
+        await userService.update(userId, user);
+        await commentService.updateComment(Number(commentId) , comment);
+        return res.status(200).json({});
     }
 
 }

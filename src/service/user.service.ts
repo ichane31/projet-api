@@ -16,11 +16,15 @@ class UserService {
 		return this.userRepository.save({ ...user, id: userId });
 	}
 	public async getAll(): Promise<User[]> {
-		return this.userRepository.find();
+		return this.userRepository.find({relations: ['favorites']});
 	}
 
 	public async getById(id: number): Promise<User | null> {
-		return this.userRepository.findOne({ where: { id } });
+		return this.userRepository.findOne({ where: { id } , relations: ['favorites' , 'devices']});
+	}
+	
+	public async getByIdWithDeepFavoriteBy(id: number): Promise<User | null> {
+		return this.userRepository.findOne({ where: { id }, relations: ['favorites.favoritedBy.favorites']});
 	}
 
 	public async create(user: User): Promise<User> {

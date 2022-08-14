@@ -4,8 +4,6 @@ import searchService from '../service/search.service';
 import { Controller, Get, Post, Body, Delete, Put } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SearchResult } from '../types/searchresult'
-import { Course } from '../model/course';
-import { Chapter } from '../model/chapter';
 import { Projet } from '../model/projet';
 
 @ApiTags('Search')

@@ -1,4 +1,4 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationCount } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationCount ,ManyToMany ,JoinTable } from "typeorm";
 import { Likes } from "./likes";
 import { Projet } from "./projet";
 import { User } from "./user";
@@ -32,10 +32,21 @@ export class Comment extends BaseEntity {
     @OneToMany(()=> Comment , comment => comment.commentParent)
     replies: Comment[]
 
-    // @OneToMany(() => Likes,)
-    // likes: Likes[];
+    @ManyToMany(
+        type => User,
+        user => user.likes,
+        { eager: true },
+      )
+      @JoinTable({
+        name: 'likes',
+        inverseJoinColumn: {name: 'user' , referencedColumnName: 'id'},
+        joinColumn: {name: 'comment' , referencedColumnName: 'id'}
+      })
+      likedBy: User[];
     
-    // @RelationCount((comment: Comment) => comment.likes)
-    // likesCount: number;
+      @RelationCount((comment: Comment) => comment.likedBy)
+      likesCount: number;
+
+    
 
 }
