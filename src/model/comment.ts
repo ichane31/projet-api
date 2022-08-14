@@ -1,5 +1,4 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationCount ,ManyToMany ,JoinTable } from "typeorm";
-import { Likes } from "./likes";
 import { Projet } from "./projet";
 import { User } from "./user";
 

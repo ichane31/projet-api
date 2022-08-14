@@ -6,7 +6,7 @@ import  projetService from './projet.service';
 import userService from './user.service';
 import { User } from '../model/user';
 import { Projet } from '../model/projet';
-// import  likesService  from './likes.service';
+
 
 @Injectable()
 export class CommentService {

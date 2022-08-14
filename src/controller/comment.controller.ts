@@ -86,7 +86,7 @@ export class CommentController {
             throw new NotFoundException('Comment not found');
         }
 
-        res.status(200).json({ ...comment , projet: comment.projet.id , nbrereplies : comment.replies.length , commentaireParent : comment.commentParent.id});
+        res.status(200).json({ ...comment , projet: comment.projet.id , nbrereplies : comment.replies.length , commentaireParent : comment.commentParent?.id});
     }
 
     @ApiOperation({ description: 'Modify a comment' })
