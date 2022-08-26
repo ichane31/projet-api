@@ -139,7 +139,7 @@ export class CommentController {
             throw new NotFoundException('Comment not found');
         }
         
-        // if(comment.author.id !== Number(userId)) {
+        // if(comment.author.id !== (userId)) {
         //     throw new HttpException('You do not own this comment',
         //     HttpStatus.UNAUTHORIZED,)
 
@@ -164,6 +164,28 @@ export class CommentController {
             throw new NotFoundException('Projet not found');
 
         let comments = await commentService.getComments(projetId);
+        res.status(200).json(comments.map(c => {return {
+            ...c,
+            projet: c.projet.id,
+            nbrereplies: c.replies.length,
+            
+        }}));
+    }
+
+    @ApiOperation({ description: 'Get a list of comments Parent for a given projet' })
+    @ApiResponse({
+        status: 404,
+        description: 'Projet not found',
+    })
+    @Get('/:projetId/Parentlist')
+    public async getCommentsParentByProjet(req: Request, res: Response) {
+        const  projetId  = Number(req.params.projetId);
+        const projet = await projetService.getById(projetId);
+
+        if (!projet)
+            throw new NotFoundException('Projet not found');
+
+        let comments = await commentService.getCommentsParents(projetId);
         res.status(200).json(comments.map(c => {return {
             ...c,
             projet: c.projet.id,
@@ -275,6 +297,9 @@ export class CommentController {
         if (!comment) {
             throw new NotFoundException('Comment not found');
         }
+        if(comment.likedBy.filter(com => com.id === userId).length >0) {
+            return res.status(400).json({msg:'Comment already liked'});
+          }
         user.likes.push(comment);
         comment.likedBy.push(user);
         await commentService.updateComment(Number(commentId),comment);
@@ -301,7 +326,9 @@ export class CommentController {
         if (!comment) {
             throw new NotFoundException('Comment not found');
         }
-
+        if(comment.likedBy.filter(com => com.id === userId).length ===0) {
+            return res.status(400).json({msg:'Comment has not yet been liked'});
+          }
         user.likes = user.likes.filter(like => like.id !== comment.id);
         comment.likedBy = comment.likedBy.filter(lik => lik.id !== user.id);
         await userService.update(userId, user);

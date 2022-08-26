@@ -16,7 +16,7 @@ export class ProjetService {
     }
 
    async getCount(count : number): Promise<Projet[]> {
-      return this.projetRepository.find({relations:['category ','author' ,'comments' , 'notes'] ,
+      return this.projetRepository.find({relations:['category','author','comments','notes'] ,
      order :{'createdAt' :'DESC'} , take : count});
       }
 

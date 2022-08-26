@@ -338,7 +338,9 @@ export class ProjetController {
 
       const user = await userService.getById(userId);
       if(!user) { throw new NotFoundException('Invalid user');}
-
+      if(projet.favoritedBy.filter(fav => fav.id === userId).length >0) {
+        return res.status(400).json({msg:'Projet already add to favourites'});
+      }
       const favProjet = await projetService.favoriteProjet(projetId, user);
       await userService.update(userId , user);
       return res.status(200).json({ ...favProjet,comments: favProjet.commentCount, notes: favProjet.notes.length, favorites: favProjet.favoritesCount });
@@ -375,6 +377,10 @@ public async unfavoriteProjet(req: Request , res: Response){
     const user = await userService.getById(userId);
     if(!user) {
         throw new NotFoundException('User not found');
+      }
+    
+    if(projet.favoritedBy.filter(fav => fav.id === userId).length ===0) {
+        return res.status(400).json({msg:'Projet has not yet been add to favourites'});
       }
     const unfavProjet = await projetService.unfavoriteProjet(projetId, user);
     await userService.update(userId, user);

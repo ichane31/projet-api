@@ -9,8 +9,15 @@ export class Device extends BaseEntity {
 
     @Column()
     identifier: string;
-    @Column()
-    token: string;
+    @Column({ default: 'Unknown device' })
+    platform: string;
+
+    @Column({ nullable: true }) active: Date;
+
+    @Column({ default: false }) trusted: boolean;
+
+    // @Column()
+    // token: string;
     
     @ManyToOne(
         () => User,

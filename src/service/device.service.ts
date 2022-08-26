@@ -31,6 +31,15 @@ export class DeviceService {
         return this.repository.findOne({ where: { identifier: device }, relations: ['user'] });
     }
 
+    public presente(device: Device) {
+        return {
+            id: device.id,
+            loggedIn: device.createdAt,
+            platform: device.platform,
+            lastSession: device.active,
+            trusted: device.trusted
+        }
+    }
 }
 
 export default new DeviceService();

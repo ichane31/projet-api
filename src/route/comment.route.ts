@@ -18,6 +18,7 @@ class CommentRouter {
         this.router.put('/:commentId', commentController.updateComment);
         this.router.delete('/:commentId', commentController.deleteComment);
         this.router.get('/:projetId/list',commentController.getCommentsByProjet);
+        this.router.get('/:projetId/Parentlist',commentController.getCommentsParentByProjet);
         this.router.get('/:parentId/Replieslist',commentController.getRepliesByComment);
         this.router.get('/:projetId/count', commentController.countCommentByProjet);
         this.router.post('/:commentId/reply', commentController.replyToComment);

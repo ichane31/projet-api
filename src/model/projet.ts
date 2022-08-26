@@ -53,7 +53,7 @@ export class Projet extends BaseEntity {
 
     @ManyToOne(
         () => Category,
-        category => category.courses
+        category => category.projets
     )
     @JoinColumn({
         name: 'category_id'

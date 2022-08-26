@@ -1,4 +1,4 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationCount ,ManyToMany ,JoinTable } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, UpdateDateColumn,Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationCount ,ManyToMany ,JoinTable } from "typeorm";
 import { Projet } from "./projet";
 import { User } from "./user";
 
@@ -13,7 +13,7 @@ export class Comment extends BaseEntity {
     @CreateDateColumn({ type: 'timestamp' })
     createdDate: Date
 
-    @CreateDateColumn({ type: 'timestamp' })
+    @UpdateDateColumn({ type: 'timestamp' })
     updatedDate: Date
 
     @ManyToOne(type => Projet, projet => projet.comments)

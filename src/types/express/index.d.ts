@@ -3,6 +3,9 @@ declare namespace Express {
 		currentUser?: {
 			userId: number;
 			role: number;
+			exp?: number ;
+			v? : number;
+			refresh? : number;
 		};
 		session: {
 			access_token?: string;

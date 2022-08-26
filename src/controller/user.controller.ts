@@ -23,6 +23,7 @@ import { LoginDTO } from '../dto/login.dto';
 import { IEmail } from '../types/email.interface';
 import deviceService from '../service/device.service';
 import { Device } from '../model/device'
+import { UnauthorizedError } from '../error/UnauthorizedError.error';
 
 
 @ApiTags('User')
@@ -34,50 +35,40 @@ export class UserController {
 		res.status(200).json(req.currentUser);
 	}
 
+	@Get('/admin')
+	@ApiOperation({ description: 'get all admins' })
+	public async getAdmins(req: Request, res: Response) {
+		let user = await userService.getAdmins();
+		if (!user.length) {
+			let y = await userService.setAdmin();
+			res.status(300).json(userService.presente(y, '', false));
+		}
+		res.status(200).json(user.map(e => userService.presente(e, '', false)));
+	}
+
 	@Get('/')
 	@ApiOperation({ description: 'get the ist of all users' })
 	public async allUsers(req: Request, res: Response) {
-		res.status(200).json((await userService.getAll()).map((user) => ({
-			...user,
-			password: undefined,
-			//active: req.currentUser.role == Role.ADMIN ? user.active : undefined,
-			//createdAt: req.currentUser.role == Role.ADMIN ? user.createdAt : undefined,
-			updatedAt: undefined,
-			favorites: undefined,
-			likes : undefined,
-		})));
+		// let defaultImage = await fileService.getDefaultImage();
+		res.status(200).json((await userService.getAll()).map((user) => userService.presente(user , '' ,false)));
 	}
 
 	@Get('/active')
 	@ApiOperation({ description: 'get the list of active users' })
 	public async allActiveUsers(req: Request, res: Response) {
+		// let defaultImage = await fileService.getDefaultImage();
 		res.status(200).json((await userService.getAll()).filter(x => {
 			return (new Date()).getTime() - x.active.getTime() < 24 * 60 * 60 * 1000;
-		}).map((user) => ({
-			...user,
-			password: undefined,
-			//active: req.currentUser.role == Role.ADMIN ? user.active : undefined,
-			//createdAt: req.currentUser.role == Role.ADMIN ? user.createdAt : undefined,
-			updatedAt: undefined,
-			favorites: undefined,
-			likes: undefined
-		})));
+		}).map((user) => userService.presente(user , '' , true)));
 	}
 
 	@Get('/joined')
 	@ApiOperation({ description: 'get the list of recently joined users' })
 	public async allJoinedUsers(req: Request, res: Response) {
+		// let defaultImage = await fileService.getDefaultImage();
 		res.status(200).json((await userService.getAll()).filter(x => {
 			return (new Date()).getTime() - x.createdAt.getTime() < 24 * 60 * 60 * 1000;
-		}).map((user) => ({
-			...user,
-			password: undefined,
-			//active: req.currentUser.role == Role.ADMIN ? user.active : undefined,
-			//createdAt: req.currentUser.role == Role.ADMIN ? user.createdAt : undefined,
-			updatedAt: undefined,
-			favorites: undefined,
-			likes: undefined
-		})));
+		}).map((user) => userService.presente(user , '' , true)));
 	}
 
 	@Post('/')
@@ -114,7 +105,7 @@ export class UserController {
 			htmlService.createLink(link, 'Verify your account'),
 			email,
 			'Verify your labLib_Projets registration');
-		res.status(200).json({ message: "email sent" });
+		res.status(200).json({ message: "email is sent to you mail account" });
 	}
 
 	@Get('/verify/:token')
@@ -144,7 +135,7 @@ export class UserController {
 		}
 
 		const newUser = await userService.create(user);
-		res.status(201).json({ ...newUser, password: undefined });
+		res.status(201).redirect('http://localhost:3000/login');
 	}
 
 	@Get('/resetpassword')
@@ -160,8 +151,8 @@ export class UserController {
 		emailService.sendMail(
 			htmlService.createLink(link, 'click to reset your password'),
 			user.email,
-			'Reset Your LabLib Password');
-		return res.status(200).json({ message: 'email sent' });
+			'Reset Your LabLib-projets Password');
+		return res.status(200).json({ message: 'email sent to you mailbox' });
 	}
 
 	@Get('/resetpassword/:token')
@@ -180,7 +171,22 @@ export class UserController {
 		if (!user) {
 			throw new NotFoundException('User not found');
 		}
-		res.status(200).sendFile(path.join(__dirname, '../../static/passwordreset.html'));
+		// res.status(200).sendFile(path.join(__dirname, '../../static/passwordreset.html'));
+		res.status(200).send(`<html lang="fr">
+		<head>
+			<meta charset="UTF-8">
+			<meta http-equiv="X-UA-Compatible" content="IE=edge">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title> Reinitialiser le mot de passe </title>
+		</head>
+		<body>
+			<form method="post" action="./${token}">
+				<input type="password" name="password" placeholder="Entrer votre nouveau mot de passe " required>
+				<input type="password" name="confirm" placeholder="Re-entrer votre nouveau mot de passe" required>
+				<input type="submit" value="Confirm" />
+			</form>
+		</body>
+		</html>`);
 	}
 
 	@Get('/changeemail/:token')
@@ -201,7 +207,7 @@ export class UserController {
 		}
 		user.email = body.email;
 		let updatedUser = userService.update(id, user);
-		res.status(200).json({ message: 'Email updated successfully' });
+		res.status(200).json({ message: 'Email updated successfully' }).redirect('');
 	}
 
 	@Post('/resetpassword/:token')
@@ -223,7 +229,7 @@ export class UserController {
 		}
 		user.password = await passwordService.hashPassword(password);
 		await userService.update(userId, user);
-		res.status(200).json({ message: "password updated successfully" });
+		res.status(200).json({ message: "password updated successfully" }).redirect('');
 	}
 
 	@Get('/:userId')
@@ -262,14 +268,20 @@ export class UserController {
 			role: user.role as Role
 		});
 
+		// const $token = jwtService.signRefresh({
+		// 	userId: user.id,
+		// 	role: user.role as Role,
+		// 	v: user.MFA ? 0 : 1
+		// });
+
 		/*req.session.access_token = token;
-		req.sessionOptions.expires = moment().add(1, 'day').toDate();
-		res.cookie("Authorization", "Bearer " + token, {
-			httpOnly: true,
-			maxAge: 3600000,
-			sameSite: "none",
-			secure: true
-		});*/
+		req.sessionOptions.expires = moment().add(1, 'day').toDate();*/
+		// res.cookie("refresh-auth", "Refresh  " + $token, {
+		// 	httpOnly: true,
+		// 	maxAge: 3600000,
+		// 	sameSite: "none",
+		// 	secure: true
+		// });
 
 		user.active = new Date();
 
@@ -280,19 +292,28 @@ export class UserController {
 			let _device = new Device();
 			_device.identifier = device;
 			_device.user = user;
-			_device.token = token;
+			_device.platform = req.body?.plateform;
+			 _device.trusted = !user.MFA;
 			await deviceService.create(_device);
 		}
 
 		await userService.update(user.id, user);
-		res.status(200).json({ ...user, password: undefined, favorites: undefined, likes: undefined, token });
+		
+		let exp : number;
+
+		try {
+			exp = ( jwtService.verify(token)).exp;
+		}catch (err) {
+            
+		}
+		res.status(200).json({ ...user, password: undefined, favorites: undefined, likes: undefined, token  , exp});
 	}
 
 	@Post('/logout')
 	@ApiOperation({ description: 'close the session' })
 	public async logout(req: Request, res: Response) {
 		/*req.session.access_token = undefined;
-		res.clearCookie('Authorization');*/
+		res.clearCookie('refresh-auth');*/
 		if (req.headers['authorization']) {
 			let h = req.headers['authorization'];
 			let [type, token] = h.split(' ');
@@ -309,7 +330,10 @@ export class UserController {
 	@ApiOperation({ description: 'get detailed informations about the current user' })
 	public async details(req: Request, res: Response) {
 		const user = await userService.getById(req.currentUser?.userId!);
-		const userNoPassword = { ...user, password: undefined, favorites: user.favorites?.length , likes: user.likes?.length };
+		if (!user) throw new NotFoundException('this user isnt valid :(' + JSON.stringify(user) +')');
+		// let defaultImage = await fileService.getDefaultImage();
+		let device = req.device || null;
+		const userNoPassword = { ...userService.presente(user , '' , true) , favorites: user.favorites?.length , likes: user.likes?.length };
 		res.status(200).json(userNoPassword);
 	}
 
@@ -325,7 +349,7 @@ export class UserController {
 		user.role = Role.ADMIN;
 		const updatedUser = await userService.update(Number(userId), user);
 
-		return res.status(200).json({ ...updatedUser, password: undefined });
+		return res.status(200).json(userService.presente(updatedUser , '' ,true) );
 	}
 
 	@Put('/:userId/demote')
@@ -340,7 +364,23 @@ export class UserController {
 		user.role = Role.USER;
 		const updatedUser = await userService.update(Number(userId), user);
 
-		return res.status(200).json({ ...updatedUser, password: undefined });
+		return res.status(200).json(userService.presente(updatedUser , '' , true));
+	}
+
+	@Get('/refresh')
+	public async refreshToken(req: Request, res: Response) {
+		if (req.currentUser.refresh == 2) throw new UnauthorizedError('Not available for this auth method')
+		const user = await userService.getById(Number(req.currentUser.userId));
+		let { firstname, lastname, id } = user;
+		let token = jwtService.sign({
+			userId: user.id,
+			role: user.role
+		});
+		let exp: number;
+		try {
+			exp = ( jwtService.verify(token)).exp;
+		} catch (_) { }
+		res.status(200).json({ firstname, lastname, id, token, exp });
 	}
 
 	@Get('/role/admin')
@@ -361,36 +401,45 @@ export class UserController {
 	})
 	@ApiOperation({ description: 'update information about the current user' })
 	public async updateCurrentUser(req: Request, res: Response) {
-		const { email, firstname, lastname, password, currentPassword } = req.body;
+		let { email, firstname, lastname, password, currentPassword } = req.body;
 		const user = await userService.getById(req.currentUser.userId);
-
-		let isPasswordValid = await passwordService.comparePassword(currentPassword, user.password);
-		if (!isPasswordValid) {
-			throw new BadRequestException('Invalid password');
-		}
 
 		firstname && (user.firstname = firstname);
 		lastname && (user.lastname = lastname);
 
-		if (email && user.email != email) {
-			if (!/^[\w\-\.]+@[\w\-]+\.[\.a-z]+$/.test(email.trim().toLowerCase())) {
-				throw new BadRequestException(`email ${email} must be a valid email address`);
+		if (email || password) {
+			if (!currentPassword) {
+				throw new BadRequestException ('current password must be provided');
+			}
+			let isPasswordValid = await passwordService.comparePassword(currentPassword , user.password);
+
+			if(!isPasswordValid) {
+				throw new BadRequestException('Invalid password');
 			}
 
-			let isUsed = await userService.getByEmail(email);
-			if (isUsed) throw new BadRequestException('Email already in use');
-			//user.email = email;
-			let token = await jwtService.signEmail({
-				id: user.id,
-				email
-			});
-			emailService.sendMail(htmlService.createLink(config.origin + 'api/v1/user/changeemail/' + token, 'click to change your email address'), email, 'Change Password For Your LabLib Account');
-			//sign new email address with user id and send it to the email
-		}
-		if (password) {
-			if (password.length < 8 || /^[\w]+$/.test(password))
-				throw new BadRequestException(`password must be at least 8 characters long with one special character at least`);
-			user.password = await passwordService.hashPassword(password);
+			if(email && user.email !=email) {
+				email = email.toLowerCase();
+				if(!/^[\w\-\.]+@[\w\-]+\.[\.a-z]+$/.test(email.trim().toLowerCase())) {
+					throw new BadRequestException(`email ${email} must be a valid email address`);
+				}
+
+				let isUsed = await userService.getByEmail(email);
+				if (isUsed ) {
+					throw new BadRequestException('email already in use');
+				}
+
+				let token  = jwtService.signEmail({
+					id : user.id ,
+					email
+				});
+				emailService.sendMail(htmlService.createLink(config.origin 	+ 'api/v1/user/changeemail/' + token , 'change your email address') , email , 'Change password for your lablib-projets account');
+			}
+
+			if(password) {
+				if (password.length < 8 || /^[\w]+$/.test(password))
+					throw new BadRequestException(`password must be at least 8 characters long with one special character at least`);
+				user.password = await passwordService.hashPassword(password);
+			}
 		}
 
 		if (req.files && req.files.image) {
@@ -403,15 +452,14 @@ export class UserController {
 		}
 
 		const updatedUser = await userService.update(req.currentUser.userId, user);
-		return res.status(200).json({ ...updatedUser, password: undefined });
+		return res.status(200).json(userService.presente(updatedUser , '' , true));
 	}
 
 	@Delete('/:userId')
 	public async delete(req: Request, res: Response) {
 		const { userId } = req.params;
-		console.log('delete user', userId);
+
 		const user = await userService.getById(Number(userId));
-		console.log('delete user', user);
 
 		if (!user)
 			throw new NotFoundException('User not found');

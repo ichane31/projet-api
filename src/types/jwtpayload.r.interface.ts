@@ -1,7 +1,7 @@
 import { Role } from './role.enum';
 
-export interface IPayload {
+export interface IRPayload {
 	userId: number;
 	role: Role;
-	exp?:number;
+	v: number;
 }

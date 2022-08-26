@@ -40,7 +40,10 @@ export class CommentService {
     public async getComments(projetId: number): Promise<Comment[]> {
         return (await this.getAll()).filter(x => x.projet?.id === projetId);
     }
-
+    
+    public async getCommentsParents(projetId: number): Promise<Comment[]> {
+        return (await this.getComments(projetId)).filter(x => x.commentParent === null);
+    }
 
     public async createComment(comment: Comment ): Promise<Comment> { 
         const createdComment =  this.commentRepository.save(comment);
