@@ -11,6 +11,6 @@ export const config = {
 	COOKIE_DOMAIN: 'localhost',
 	DB_URL: process.env.DATABASE_URL,
 	// SESSION_SECRET: process.env.SESSION_SECRET||'',
-	EMAIL_USERNAME: process.env.EMAIL_USERNAME,
-	EMAIL_PASSWORD: process.env.EMAIL_PASSWORD
+	EMAIL_USERNAME: process.env.EMAIL_USERNAME || 'ichaneapis',
+	EMAIL_PASSWORD: process.env.EMAIL_PASSWORD || 'fVPuptWjGNXE'
 };
