@@ -1,15 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { UnauthorizedError } from '../error/UnauthorizedError.error';
-import { decodeUser } from './decodeuser.middleware';
 
-export const ensureAuthenticated = (
+export const ensureAuthenticatedAny = (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ) => {
-	decodeUser
-	if (req.currentUser?.userId) {
-		return next();
+	if (req.currentUser?.userId && req.currentUser?.refresh !== 1) {
+        return next();
 	}
 
 	throw new UnauthorizedError('Not Logged In');

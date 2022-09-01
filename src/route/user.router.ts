@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import userController from '../controller/user.controller';
+import { decodeUser } from '../middleware/decodeuser.middleware';
 import { ensureAccessLevel } from '../middleware/ensureAccessLevel';
 import { ensureAuthenticated } from '../middleware/ensureAuthenticated.middleware';
 import { ensureNotLoggedIn } from '../middleware/ensureNotLoggedIn.middleware';
@@ -51,7 +52,7 @@ class AdminRouter {
 
 		this.router.get(
 			'/me',
-			ensureAuthenticated,
+			decodeUser,
 			userController.currentUser
 		);
 

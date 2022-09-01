@@ -1,15 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { UnauthorizedError } from '../error/UnauthorizedError.error';
-import { decodeUser } from './decodeuser.middleware';
 
-export const ensureAuthenticated = (
+export const ensureUncompleteAuth = (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ) => {
-	decodeUser
-	if (req.currentUser?.userId) {
-		return next();
+	if (req.currentUser?.userId && req.currentUser?.refresh) {
+		if (req.currentUser.v == 0)
+			return next();
+		throw new UnauthorizedError('You are already verified');
 	}
 
 	throw new UnauthorizedError('Not Logged In');

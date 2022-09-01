@@ -24,6 +24,7 @@ import { IEmail } from '../types/email.interface';
 import deviceService from '../service/device.service';
 import { Device } from '../model/device'
 import { UnauthorizedError } from '../error/UnauthorizedError.error';
+import { IPayload } from '../types/jwtpayload.interface';
 
 
 @ApiTags('User')
@@ -69,6 +70,15 @@ export class UserController {
 		res.status(200).json((await userService.getAll()).filter(x => {
 			return (new Date()).getTime() - x.createdAt.getTime() < 24 * 60 * 60 * 1000;
 		}).map((user) => userService.presente(user , '' , true)));
+	}
+
+	@Get('/joined/month')
+	@ApiOperation({description: 'get a list of recently joined users'})
+	public async getMonthlyJoinedUsers(req: Request, res: Response) {
+		let defaultImage = await fileService.getDefaultImage();
+		res.status(200).json((await (await userService.getAll()).filter(u => {
+			return (new Date()).getTime() - u.createdAt.getTime() < 30*24*60*60*1000;
+		})))
 	}
 
 	@Post('/')
@@ -135,7 +145,64 @@ export class UserController {
 		}
 
 		const newUser = await userService.create(user);
-		res.status(201).redirect('http://localhost:3000/login');
+		res.status(200).send(`<html lang="fr">
+		<head>
+			<meta charset="UTF-8">
+			<meta http-equiv="X-UA-Compatible" content="IE=edge">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>Email verify</title>
+			<style>
+				form {align-items:center;
+					margin: 10px;
+				}
+				.divEmail{
+					justify-content:center;
+					align-items: center;
+					position: relative;
+					text-align: center;
+					background:  rgb(209, 218, 195);
+					/* min-width:400px;   */
+					/* max-height:400px; */
+					width: auto;
+					height: auto;
+					margin: 17% ;
+					margin-top: 18%;
+					margin-bottom: 10%;
+					box-shadow: 0 10px 25px rgba(45, 1, 38, 0.2);
+					border-radius: 10px;
+					overflow: hidden;
+				}
+				.email_btn {
+					align-items: center;
+					/* margin-left : 41%; */
+					background-color:rgb(27, 210, 189);
+				}
+				.email_btn a{
+					color:black;
+					text-decoration: none;
+				}
+				h3 {text-align: center;
+				color:rgb(192, 17, 204);}
+		
+			</style>
+		</head>
+		<body>
+			
+			<div class="divEmail bg-gray-500 ">
+				<form class="mt-5 justify-content-center">
+					<h3 class="text-primary">Verification du compte</h3>
+					
+					<p class="text-center mb-4 text-muted">
+					   Votre compte a été verifier avec success , vous pouvez vous connecter maintenant.
+					</p>
+			
+					<button class="btn email_btn bg-success text-black mb-3" > <a className="text-center text-white" href="/Login">Connection</a></button>
+				</form>
+				  
+				</div>
+			
+		</body>
+		</html>`);
 	}
 
 	@Get('/resetpassword')
@@ -273,9 +340,9 @@ export class UserController {
 		// 	role: user.role as Role,
 		// 	v: user.MFA ? 0 : 1
 		// });
-
-		/*req.session.access_token = token;
-		req.sessionOptions.expires = moment().add(1, 'day').toDate();*/
+		
+		
+		// req.sessionOptions.expires = moment().add(1, 'day').toDate();*/
 		// res.cookie("refresh-auth", "Refresh  " + $token, {
 		// 	httpOnly: true,
 		// 	maxAge: 3600000,
@@ -283,6 +350,10 @@ export class UserController {
 		// 	secure: true
 		// });
 
+		res.setHeader('x-access-token', 'Bearer ' + token);
+		res.setHeader('authorization', 'Bearer ' + token);
+		
+		
 		user.active = new Date();
 
 		if (device) {
@@ -307,6 +378,7 @@ export class UserController {
             
 		}
 		res.status(200).json({ ...user, password: undefined, favorites: undefined, likes: undefined, token  , exp});
+		
 	}
 
 	@Post('/logout')
@@ -377,10 +449,11 @@ export class UserController {
 			role: user.role
 		});
 		let exp: number;
+		let $token = req.headers['authorization'].split(' ').slice(1).join('');
 		try {
 			exp = ( jwtService.verify(token)).exp;
 		} catch (_) { }
-		res.status(200).json({ firstname, lastname, id, token, exp });
+		res.status(200).json({ firstname, lastname, id, token, exp , $token });
 	}
 
 	@Get('/role/admin')
