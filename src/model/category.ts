@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { Course } from "./course";
 import { Projet } from "./projet";
 import { Files } from "./files";
 
@@ -18,11 +17,6 @@ export class Category extends BaseEntity {
         nullable: true
     })
     image: string
-    @OneToMany(
-        () => Course,
-        course => course.category
-    )
-    courses: Course[]
 
     @OneToMany(
         () => Projet,

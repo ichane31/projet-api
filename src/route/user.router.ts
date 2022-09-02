@@ -58,23 +58,16 @@ class AdminRouter {
 
 		this.router.put(
 			'/me',
-			ensureAuthenticated,
+			decodeUser,
 			userController.updateCurrentUser
 		);
 
 		this.router.get(
 			'/me/details',
-			ensureAuthenticated,
+			decodeUser,
 			userController.details
 		);
 
-		this.router.get('/me/device',
-			ensureAuthenticated,
-			userController.getDevices);
-
-		this.router.delete('/me/device/:id',
-			ensureAuthenticated,
-			userController.removeDevice);
 
 		this.router.post(
 			'/',
@@ -87,35 +80,35 @@ class AdminRouter {
 		);
 
 		this.router.post('/login', ensureNotLoggedIn, userController.login);
-		this.router.post('/logout', ensureAuthenticated, userController.logout);
+		this.router.post('/logout', decodeUser, userController.logout);
 
 		this.router.get('/role/user',
-			ensureAuthenticated,
+		decodeUser,
 			ensureAccessLevel(Role.ADMIN),
 			userController.getRoleUser);
 
 		this.router.get('/role/admin',
-			ensureAuthenticated,
+		decodeUser,
 			ensureAccessLevel(Role.ADMIN),
 			userController.getRoleAdmin);
 
 		this.router.put('/:userId/promote',
-			ensureAuthenticated,
+		      decodeUser,
 			ensureAccessLevel(Role.ADMIN),
 			userController.promote);
 
 		this.router.put('/:userId/demote',
-			ensureAuthenticated,
+			decodeUser,
 			ensureAccessLevel(Role.ADMIN),
 			userController.demote);
 
 		this.router.get(
 			'/:userId',
-			ensureAuthenticated,
+			decodeUser,
 			userController.userById
 		);
 		this.router.delete('/:userId', userController.delete);
-		this.router.get('/test/otp', userController.getOTP)
+		
 	}
 }
 

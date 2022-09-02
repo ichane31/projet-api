@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { BadRequestException } from '../error/BadRequestException.error';
 import { Category } from '../model/category';
 import categoryService from '../service/category.service';
-import courseService from '../service/course.service';
 import { Controller, Get, Post, Body, Delete, Put } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PostCategoryDTO } from '../dto/post.category.dto'
@@ -196,42 +195,6 @@ export class CategoryController {
 
         return res.status(200).json({});
     }
-
-
-    @ApiOperation({ description: 'Get a list of courses for a given category' })
-    @ApiParam({
-        name: 'categoryId',
-        description: 'id of the category',
-        allowEmptyValue: false,
-        type: number,
-        examples: { a: { summary: 'id of the category is 5', value: 5 } }
-    })
-    @ApiOkResponse(
-        {
-            description: 'Courses list',
-            schema: {
-                type: 'Course[]',
-                example: [{ id: 3, name: "ExpressJS", description: 'Course\'s description' }]
-            }
-        }
-    )
-    @ApiResponse({
-        status: 404,
-        description: 'Category not found',
-    })
-    @Get('/:categoryId/list')
-    public async allCoursesByCategory(req: Request, res: Response) {
-        const { categoryId } = req.params;
-        const category = await categoryService.getById(Number(categoryId));
-
-        if (!category) {
-            throw new NotFoundException('Category not found');
-        }
-
-        let courses = await courseService.getByCategory(Number(categoryId));
-        res.status(200).json(courses.map(c => {
-            return { ...c, category: c.category.name, chapters: c.chapters.length }}))
-        }
 
 
     @ApiOperation({ description: 'Get a list of projet for a given category' })

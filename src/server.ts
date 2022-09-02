@@ -93,31 +93,7 @@ export class App {
             next();
         });
         
-        // this._app.use(securityMiddleware);
-        /*this._app.use(
-            cookieSession({
-                name: 'access_token',
-                domain: config.COOKIE_DOMAIN,
-                signed: false,
-                httpOnly: true,
-                secure: config.NODE_ENV === 'production',
-                sameSite: "none",
-                //secureProxy: true,
-                secret: config.SESSION_SECRET
-            })
-        );
-        this._app.use(session({
-            store: sessionService.sessionHandler(),
-            secret: config.SESSION_SECRET,
-            cookie: {
-                sameSite: "none",
-                maxAge: 60 * 60 * 24,
-                secure: config.NODE_ENV === 'production'
-            },
-            unset: "destroy",
-            resave: false,
-            saveUninitialized: false
-        }));*/
+        
         // this._app.use(
         //     decodeUser
         // );

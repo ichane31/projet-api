@@ -1,10 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, ManyToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Role } from '../types/role.enum';
-import { Lab } from "./lab";
 import { Projet } from "./projet";
 import { Comment } from "./comment";
 import { Note } from "./note";
-import {Device} from "./device";
+
 @Entity()
 export class User extends BaseEntity {
     @PrimaryGeneratedColumn()
@@ -31,15 +30,7 @@ export class User extends BaseEntity {
         nullable: true
     })
     active: Date
-    @Column({
-        default: false
-    })
-    MFA: boolean
-    @OneToMany(
-        () => Lab,
-        lab => lab.user
-    )
-    labs: Lab[]
+    
 
     @OneToMany(
         () => Projet,
@@ -69,11 +60,6 @@ export class User extends BaseEntity {
       )
       likes: Comment[];
 
-    @OneToMany(
-        () => Device,
-        device => device.user
-    )
-    devices: Device[];
 
     @CreateDateColumn()
     createdAt: Date;

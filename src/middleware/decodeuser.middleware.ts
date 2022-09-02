@@ -3,9 +3,6 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config/env.config';
 import { IPayload } from '../types/jwtpayload.interface';
 import userService from '../service/user.service';
-import { IRPayload} from '../types/jwtpayload.r.interface';
-import deviceService from '../service/device.service';
-import { ModuleTokenFactory } from '@nestjs/core/injector/module-token-factory';
 import { UnauthorizedError } from '../error/UnauthorizedError.error';
 
 

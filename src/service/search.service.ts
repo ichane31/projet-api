@@ -1,6 +1,4 @@
 import categoryService from './category.service'
-import courseService from './course.service'
-import chapterService from './chapter.service'
 import { Injectable } from '@nestjs/common';
 import { Category } from '../model/category';
 import { Projet } from '../model/projet';

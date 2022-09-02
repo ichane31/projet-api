@@ -21,11 +21,7 @@ import { PostUserDTO } from '../dto/post.user.dto';
 import { PutUserDTO } from '../dto/put.user.dto';
 import { LoginDTO } from '../dto/login.dto';
 import { IEmail } from '../types/email.interface';
-import deviceService from '../service/device.service';
-import { Device } from '../model/device'
 import { UnauthorizedError } from '../error/UnauthorizedError.error';
-import { IPayload } from '../types/jwtpayload.interface';
-
 
 @ApiTags('User')
 @Controller('api/v1/user')
@@ -356,17 +352,7 @@ export class UserController {
 		
 		user.active = new Date();
 
-		if (device) {
-			let $device = await deviceService.getByDevice(device);
-			if ($device)
-				throw new BadRequestException('Your device is already in use. log out first');
-			let _device = new Device();
-			_device.identifier = device;
-			_device.user = user;
-			_device.platform = req.body?.plateform;
-			 _device.trusted = !user.MFA;
-			await deviceService.create(_device);
-		}
+		
 
 		await userService.update(user.id, user);
 		
@@ -389,11 +375,7 @@ export class UserController {
 		if (req.headers['authorization']) {
 			let h = req.headers['authorization'];
 			let [type, token] = h.split(' ');
-			if (type == 'Device') {
-				let device = await deviceService.getByDevice(token);
-				if (!device) throw new NotFoundException('Unknown device');
-				await deviceService.delete(device.id);
-			}
+			
 		}
 		res.status(200).json();
 	}
@@ -542,42 +524,7 @@ export class UserController {
 		return res.status(200).json({});
 	}
 
-	@Get('/test/otp')
-	@ApiOperation({ description: '(expirimensional feature) generate OneTimePassword' })
-	public async getOTP(req: Request, res: Response) {
-		let d = 30;
-		res.status(200).json({
-			resetIn: (d - ((new Date()).getTime() % (d * 1000)) / 1000) + 's',
-			otp_prev: jwtService.getOTP(req.body.key || 'test', 30, -15),
-			otp: jwtService.getOTP(req.body.key || 'test', 30, 0),
-			otp_next: jwtService.getOTP(req.body.key || 'test', 30, 15)
 
-		})
-	}
-
-	@Get('/me/device')
-	@ApiOperation({ description: '(expirimensional feature) get online devices' })
-	public async getDevices(req: Request, res: Response) {
-		let { userId } = req.currentUser;
-		let device = req.device || null;
-		let devices = (await userService.getById(userId)).devices?.map(x => {
-			return {
-				id: x.id, loggedIn: x.createdAt, thisDevice: x.id === device
-			}
-		});
-		res.status(200).json(devices);
-	}
-
-	@Delete('/me/device/:id')
-	@ApiOperation({ description: '(expirimensional feature) remove online device' })
-	public async removeDevice(req: Request, res: Response) {
-		let { userId } = req.currentUser;
-		let { id } = req.params;
-		let device = await deviceService.getById(id);
-		if (!device) throw new NotFoundException('Not found device');
-		if (device.user.id !== userId) throw new NotFoundException('this device is not linked to your account');
-		res.status(200).json(await deviceService.delete(device.id));
-	}
 	
 	}
 
