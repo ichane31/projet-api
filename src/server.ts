@@ -23,6 +23,9 @@ import fileUpload from 'express-fileupload';
 import  methodOverride from 'method-override';
 import fileRouter from './route/file.router';
 import sessionService from './service/session.service';
+import { decodeUser } from './middleware/decodeuser.middleware';
+import expressSession from 'express-session';
+import passport from 'passport';
 
 export class App {
 
@@ -94,12 +97,22 @@ export class App {
         });
         
         
-        // this._app.use(
-        //     decodeUser
-        // );
+        this._app.use(
+             decodeUser
+         );
         this._app.use(express.json({
             limit: '10mb'
         }));
+
+        // this._app.use(expressSession({
+        //     secret: 'TWC_2018',
+        //     resave: true,
+        //     saveUninitialized: true,
+        //   }));
+
+        //   this._app.use(passport.initialize());
+
+        //   this._app.use(passport.session());
     }
 
     private notFound(

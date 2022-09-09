@@ -11,6 +11,7 @@ import userService from '../service/user.service';
 import { PutCommentDTO } from '../dto/put.comment.dto';
 import { Repository } from 'typeorm';
 import { PostgresDataSource } from '../config/datasource.config';
+import { UnauthorizedError } from '../error/UnauthorizedError.error';
 
 
 @ApiTags('Comment')
@@ -49,9 +50,9 @@ export class CommentController {
     public async createComment(req: Request, res: Response) {
         const { body } = req.body;
         const {projetId } = req.params;
-        // const { userId} = req.currentUser;
+        const userId = req.currentUser.userId;
 
-        if (!projetId || !body/*|| !userId*/) {
+        if (!projetId || !body ) {
             throw new BadRequestException('Missing required fields');
         }
 
@@ -59,10 +60,10 @@ export class CommentController {
         if (!$projet) {
             throw new NotFoundException('Cannot find projet ' + projetId);
         }
-        // let $user = await userService.getById(userId);
+        let $user = await userService.getById(userId);
         const comment = new Comment();
 
-        // comment.author = $user;
+        comment.author = $user;
         comment.body = body;
         comment.projet = $projet;
         $projet.comments.push(comment);
@@ -101,19 +102,23 @@ export class CommentController {
     @Put('/:commentId')
     public async updateComment(req: Request, res: Response) {
         const { body} = req.body;
-
-        const { commentId , /*userId*/ } = req.params;
+        const userId = req.currentUser.userId;
+        const { commentId } = req.params;
         const comment = await commentService.getById(Number(commentId));
 
         if (!comment) {
             throw new NotFoundException('Comment not found');
         }
 
-    // if(comment.author.id !== Number(userId)) {
-    //     throw new HttpException('You do not own this comment',
-    //     HttpStatus.UNAUTHORIZED,)
+        const user = await userService.getById(userId);
+        if(comment.author === null) {
+            comment.author = user;
+        }
 
-    // }
+        if(comment.author.id !== userId ) {
+           throw new UnauthorizedError('You do not own this comment');
+            
+         }
 
         comment.body = body || comment.body;
 
@@ -130,7 +135,7 @@ export class CommentController {
     @Delete('/:commentId')
     public async deleteComment(req: Request, res: Response) {
         const { commentId } = req.params;
-        // const {userId} = req.currentUser;
+        const userId = req.currentUser.userId;
 
         const comment = await commentService.getById(Number(commentId));
 
@@ -139,14 +144,17 @@ export class CommentController {
             throw new NotFoundException('Comment not found');
         }
         
-        // if(comment.author.id !== (userId)) {
-        //     throw new HttpException('You do not own this comment',
-        //     HttpStatus.UNAUTHORIZED,)
-
-        // }
+        if(comment.author.id !== userId) {
+            throw new UnauthorizedError('You do not own this comment');
+        }
+        const user =await userService.getById(userId);
 
         await commentService.deleteCommentById(comment.id);
 
+        user.comments =  user.comments.filter(c => c.id !== Number(commentId));
+        comment.projet.comments = comment.projet.comments.filter(c => c.id !== comment.id);
+        await userService.update(userId , user);
+        await projetService.update(comment.projet.id, comment.projet)
         return res.status(200).json({});
     }
 
@@ -254,9 +262,9 @@ export class CommentController {
     public async replyToComment(req: Request, res: Response) {
         const { body } = req.body;
         const commentId  = Number(req.params.commentId);
-        // const {userId} = req.currentUser;
+        const userId = req.currentUser.userId;
 
-        if (!commentId /*|| !userId*/) {
+        if (!commentId || !userId) {
             throw new BadRequestException('Missing required fields');
         }
         const commentParent = await commentService.getById(commentId)
@@ -265,9 +273,14 @@ export class CommentController {
             throw new NotFoundException('Cannot find comment ' + commentId);
         }
 
+        const $user = await userService.getById(userId);
+        if (!$user) {
+            throw new NotFoundException('user not found');
+        }
+
         const reply = new Comment();
 
-        // reply.author = $user;
+        reply.author = $user;
         reply.body = body;
         reply.commentParent = commentParent;
         reply.projet = commentParent.projet;
@@ -287,7 +300,7 @@ export class CommentController {
     @Post('/:commentId/like')
     public async addCommentToLikes(req: Request, res: Response) {
         const { commentId } = req.params;
-        const { userId } = req.currentUser;
+        const  userId  = req.currentUser.userId;
         let user = await userService.getById(userId);
         if (!user) {
             throw new NotFoundException('User not found');
@@ -315,7 +328,7 @@ export class CommentController {
     @Delete('/:commentId/dislike')
     public async removeCommentFromLikes(req: Request, res: Response) {
         const { commentId } = req.params;
-        const { userId } = req.currentUser;
+        const userId  = req.currentUser.userId;
         let user = await userService.getById(userId);
         if (!user) {
             throw new NotFoundException('user not found');

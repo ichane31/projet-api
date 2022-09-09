@@ -3,6 +3,7 @@ import { Role } from '../types/role.enum';
 import { Projet } from "./projet";
 import { Comment } from "./comment";
 import { Note } from "./note";
+import { Contact } from "./contact";
 
 @Entity()
 export class User extends BaseEntity {
@@ -26,11 +27,32 @@ export class User extends BaseEntity {
         default: Role.USER
 	})
     role: Role
+
+    @Column({default : false})
+    isAdmin: boolean 
+
     @Column({
         nullable: true
     })
     active: Date
+
+    @Column({
+        default: 0,
+      })
+    tokenVersion: number;
+
+    @Column({nullable: true})
+    facebookId: string;
+
+    @Column({nullable: true})
+    googleId: string;
+
+    @Column({nullable: true})
+    twitterId: string;
     
+    get isSocial(): boolean {
+        return !!(this.facebookId || this.googleId || this.twitterId);
+      }
 
     @OneToMany(
         () => Projet,
@@ -59,6 +81,12 @@ export class User extends BaseEntity {
         comment => comment.likedBy,
       )
       likes: Comment[];
+
+    @OneToMany(
+        () => Contact,
+        contact => contact.user
+    )
+    contacts: Contact[]
 
 
     @CreateDateColumn()

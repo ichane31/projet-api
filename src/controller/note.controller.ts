@@ -9,6 +9,7 @@ import { Note } from '../model/note';
 import { PostNoteDTO } from '../dto/post.note.dto';
 import userService from '../service/user.service';
 import { PutNoteDTO } from '../dto/put.note.dto';
+import { UnauthorizedError } from '../error/UnauthorizedError.error';
 
 
 @ApiTags('Note')
@@ -23,9 +24,10 @@ export class NoteController {
     @Post('/:projetId')
     public async addNote(req: Request, res: Response) {
         const { note } = req.body;
-        const {projetId /*, userEmail*/} = req.params;
+        const {projetId } = req.params;
+        const userId = req.currentUser.userId;
 
-        if (!projetId || !note/*|| !userEmail*/) {
+        if (!projetId || !note) {
             throw new BadRequestException('Missing required fields');
         }
 
@@ -33,14 +35,22 @@ export class NoteController {
         if (!$projet) {
             throw new NotFoundException('Cannot find projet ' + projetId);
         }
-        // let $user = await userService.getByEmail(userEmail);
+        let $user = await userService.getById(userId);
+        if(!$user) {
+            throw new NotFoundException('Cannot find user ' + userId);
+        }
         const newNote = new Note();
 
-        // newNote.user = $user;
+        newNote.user = $user;
         newNote.value = note;
         newNote.projet = $projet;
         const addNote = await noteService.createNote(newNote);
 
+        $projet.notes.push(addNote);
+        $user.notes.push(addNote);
+
+        await projetService.update(Number(projetId) ,$projet);
+        await userService.update(userId, $user);
         res.status(201).json({ ...addNote, projet: newNote.projet.title });
     }
 
@@ -68,19 +78,25 @@ export class NoteController {
     @Put('/:noteId')
     public async updateNote(req: Request, res: Response) {
         const { note} = req.body;
-
-        const { noteId ,/* userId*/ } = req.params;
+        const userId = req.currentUser.userId;
+        const { noteId } = req.params;
         const noteGet = await noteService.getById(Number(noteId));
 
         if (!noteGet) {
             throw new NotFoundException('Comment not found');
         }
 
-    // if(noteGet.user.id !== Number(userId)) {
-    //     throw new HttpException('You do not own this note',
-    //     HttpStatus.UNAUTHORIZED,)
+        const $user = await userService.getById(userId);
+        if(noteGet.user === null) {
+            noteGet.user = $user;
+            $user.notes.push(noteGet);
+            await userService.update(userId, $user);
+        }
 
-    // }
+        else if(noteGet.user.id !== Number(userId)) {
+            throw new UnauthorizedError('You do not own this note')
+
+        }
 
         noteGet.value = note || noteGet.value;
 
@@ -97,22 +113,27 @@ export class NoteController {
     @Delete('/:noteId')
     public async deleteNote(req: Request, res: Response) {
         const { noteId } = req.params;
-        // const userId = req.currentUser.userId;
+        const userId = req.currentUser.userId;
+        const $user = await userService.getById(userId);
 
         const note = await noteService.getById(Number(noteId));
 
-
+        
         if (!note) {
             throw new NotFoundException('Note not found');
         }
-        
-        // if(note.user.id !== Number(userId)) {
-        //     throw new HttpException('You do not own this note',
-        //     HttpStatus.UNAUTHORIZED,)
 
-        // }
+        if(note.user === null) {
+            note.user = $user;
+        }
+        
+        if(note.user.id !== Number(userId)) {
+            throw new UnauthorizedError('You do not own this note')
+
+        }
 
         await noteService.deleteNoteById(note.id);
+        $user.notes = $user.notes.filter(n => n.id !== note.id);
 
         return res.status(200).json({});
     }

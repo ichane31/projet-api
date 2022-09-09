@@ -125,7 +125,7 @@ export class ProjetController {
     @Put('/:projetId')
     public async updateProjet(req: Request, res: Response) {
         const {title, description,prix , category } = req.body;
-        // const {userId} = req.currentUser.userId;
+        const userId = req.currentUser.userId;
         
         const projetId = Number(req.params.projetId);
         const projet = await projetService.getById(projetId);
@@ -134,10 +134,14 @@ export class ProjetController {
             throw new NotFoundException('Projet not found');
         }
 
-        // const user = await userService.getById(userId);
-        // if(! projetService.ensureOwnership(user,projet)) {
-        //     throw new UnauthorizedException();
-        // }
+        const user = await userService.getById(userId);
+        if(projet.author === null) {
+            projet.author = user;
+        }
+        
+        if(! projetService.ensureOwnership(user,projet)) {
+            throw new UnauthorizedException();
+        }
         if(req.files) {
             const {image , resume , rapport , presentation , videoDemo , codeSource} = req.files;
             await fileService.deleteFiles(projet);
@@ -401,12 +405,25 @@ public async unfavoriteProjet(req: Request , res: Response){
 @Get('/favorites/:count')
 public async getFavoriteProjets(req: Request, res: Response) {
     const { count } = req.params;
-    let { userId } = req.currentUser;
+    let  userId  = req.currentUser.userId;
     let user = await userService.getById(userId);
     if (!user) {
         throw new NotFoundException('Invalid user');
     }
     const projets = (user.favorites || []).slice(0 ,Number(count));
+    res.status(200).json(projets.map(projet => { return {...projet,category: projet.category.name, comments: projet.commentCount, notes: projet.notes.length }}));
+}
+
+@ApiOperation({ description: 'Get a list of favorites projets' })
+@Get('/favorites')
+public async getAllFavoriteProjets(req: Request, res: Response) {
+    
+    let  userId  = req.currentUser.userId;
+    let user = await userService.getById(userId);
+    if (!user) {
+        throw new NotFoundException('Invalid user');
+    }
+    const projets = user.favorites ;
     res.status(200).json(projets.map(projet => { return {...projet,category: projet.category.name, comments: projet.commentCount, notes: projet.notes.length }}));
 }
 

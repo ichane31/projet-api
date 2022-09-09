@@ -17,9 +17,9 @@ class JwtService {
 		});
 	}
 
-	// public signRefresh (payload: IRPayload) : string {
-	// 	return jwt.sign(payload , config.SESSION_SECRET!)
-	// }
+	public signRefresh (payload: IRPayload) : string {
+		return jwt.sign(payload , config.REFRESH_TOKEN_SECRET!)
+	}
  	public signUser(user: IUser): string {
 		return jwt.sign(user, config.JWT_SECRET!, this.options);
 	}
@@ -36,9 +36,9 @@ class JwtService {
 		return jwt.verify(token, config.JWT_SECRET!, this.options) as IPayload;
 	}
 
-	// public verifyRefresh(token: string): IPayload {
-	// 	return jwt.verify(token, config.SESSION_SECRET!, this.options) as IPayload;
-	// }
+	public verifyRefresh(token: string): IPayload {
+		return jwt.verify(token, config.REFRESH_TOKEN_SECRET!, this.options) as IPayload;
+    }
 	public verifyAccount(token: string): IUser {
 		return jwt.verify(token, config.JWT_SECRET!, this.options) as IUser;
 	}
@@ -51,7 +51,7 @@ class JwtService {
 	public signRefreshToken(payload: IPayload): string {
 		return jwt.sign(payload, config.JWT_SECRET!, {
 			...this.options,
-			expiresIn: '90d',
+			expiresIn: '30d',
 		});
 	}
 

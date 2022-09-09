@@ -43,6 +43,14 @@ export class UserController {
 		res.status(200).json(user.map(e => userService.presente(e, '', false)));
 	}
 
+	@Put('/:userId/setAdmin')
+	@ApiOperation({description: 'set user to  admin'})
+	public async setAdmin(req:Request , res: Response){
+		const {userId} = req.params;
+		let user = await userService.setOneAdmin(Number(userId));
+		res.status(200).json({message: 'Success user is promoted to admin' , user});
+	}
+
 	@Get('/')
 	@ApiOperation({ description: 'get the ist of all users' })
 	public async allUsers(req: Request, res: Response) {
@@ -108,9 +116,9 @@ export class UserController {
 			firstname, lastname
 		});
 		await emailService.sendMail(
-			htmlService.createLink(link, 'Verify your account'),
+			htmlService.createLink(link, 'Verifier votre compte mail'),
 			email,
-			'Verify your labLib_Projets registration');
+			'Confirmer votre inscription à labLib_Projets ');
 		res.status(200).json({ message: "email is sent to you mail account" });
 	}
 
@@ -219,7 +227,7 @@ export class UserController {
 	}
 
 	@Get('/resetpassword/:token')
-	@ApiOperation({ description: '(expirimental feature) get access to reset your password' })
+	@ApiOperation({ description: ' get access to reset your password' })
 	public async resetPasswordPage(req: Request, res: Response) {
 		let { token } = req.params, body: IPasswordPayload;
 		try {
@@ -234,7 +242,7 @@ export class UserController {
 		if (!user) {
 			throw new NotFoundException('User not found');
 		}
-		// res.status(200).sendFile(path.join(__dirname, '../../static/passwordreset.html'));
+		
 		res.status(200).send(`<html lang="fr">
 		<head>
 			<meta charset="UTF-8">
@@ -253,7 +261,7 @@ export class UserController {
 	}
 
 	@Get('/changeemail/:token')
-	@ApiOperation({ description: '(expirimental feature) get access to reset your password' })
+	@ApiOperation({ description: ' get access to change your email' })
 	public async changeEmail(req: Request, res: Response) {
 		let { token } = req.params, body: IEmail;
 		try {
@@ -309,7 +317,7 @@ export class UserController {
 	})
 	@ApiOperation({ description: 'authentication as a specific user' })
 	public async login(req: Request, res: Response) {
-		const { email, password, device } = req.body;
+		const { email, password } = req.body;
 
 		const user = await userService.getByEmail(email);
 
@@ -331,19 +339,20 @@ export class UserController {
 			role: user.role as Role
 		});
 
-		// const $token = jwtService.signRefresh({
-		// 	userId: user.id,
-		// 	role: user.role as Role,
-		// 	v: user.MFA ? 0 : 1
-		// });
+		const $token = jwtService.signRefresh({
+			userId: user.id,
+			role: user.role as Role,
+			tokenVersion : 0  
+	    });
 		
 		
-		// req.sessionOptions.expires = moment().add(1, 'day').toDate();*/
+		
 		// res.cookie("refresh-auth", "Refresh  " + $token, {
 		// 	httpOnly: true,
-		// 	maxAge: 3600000,
+		// 	maxAge: 1000 * 60 * 60 * 24 * 7,
 		// 	sameSite: "none",
 		// 	secure: true
+		//  path:'',
 		// });
 
 		res.setHeader('x-access-token', 'Bearer ' + token);
@@ -363,7 +372,7 @@ export class UserController {
 		}catch (err) {
             
 		}
-		res.status(200).json({ ...user, password: undefined, favorites: undefined, likes: undefined, token  , exp});
+		res.status(200).json({ ...user, password: undefined, favorites: undefined, likes: undefined, token  ,$token, exp});
 		
 	}
 
@@ -386,7 +395,7 @@ export class UserController {
 		const user = await userService.getById(req.currentUser?.userId!);
 		if (!user) throw new NotFoundException('this user isnt valid :(' + JSON.stringify(user) +')');
 		// let defaultImage = await fileService.getDefaultImage();
-		let device = req.device || null;
+		
 		const userNoPassword = { ...userService.presente(user , '' , true) , favorites: user.favorites?.length , likes: user.likes?.length };
 		res.status(200).json(userNoPassword);
 	}
@@ -401,6 +410,7 @@ export class UserController {
 		}
 
 		user.role = Role.ADMIN;
+		user.isAdmin = true;
 		const updatedUser = await userService.update(Number(userId), user);
 
 		return res.status(200).json(userService.presente(updatedUser , '' ,true) );
@@ -416,6 +426,7 @@ export class UserController {
 		}
 
 		user.role = Role.USER;
+		user.isAdmin = false;
 		const updatedUser = await userService.update(Number(userId), user);
 
 		return res.status(200).json(userService.presente(updatedUser , '' , true));

@@ -41,6 +41,23 @@ export class EmailService {
 
     }
 
+    public async sendMailQuestion (email : any , subject : string , message : string) {
+        let options = {
+            from : email,
+            to: 'ichaneapis@zohomail.com',
+            subject: subject,
+            html: message
+        };
+
+        this.transporter.sendMailQuestion(options , function(error , info) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Question envoyé' + info.response);
+        }
+        });
+    }
+
 }
 
 export default new EmailService();

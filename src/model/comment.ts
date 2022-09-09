@@ -11,10 +11,10 @@ export class Comment extends BaseEntity {
     body:string
 
     @CreateDateColumn({ type: 'timestamp' })
-    createdDate: Date
+    createdAt: Date
 
     @UpdateDateColumn({ type: 'timestamp' })
-    updatedDate: Date
+    updatedAt: Date
 
     @ManyToOne(type => Projet, projet => projet.comments)
     projet: Projet

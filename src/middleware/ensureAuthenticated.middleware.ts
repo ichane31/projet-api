@@ -12,5 +12,5 @@ export const ensureAuthenticated = (
 		return next();
 	}
 
-	throw new UnauthorizedError('Not Logged In');
+	throw new UnauthorizedError('Vous devez vous connecté');
 };

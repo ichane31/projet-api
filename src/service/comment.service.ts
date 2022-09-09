@@ -30,7 +30,7 @@ export class CommentService {
     // }
 
     public async getAll(): Promise<Comment[]> {
-        return this.commentRepository.find({ relations: ['projet', 'author', 'commentParent' ,'replies'] });
+        return this.commentRepository.find({ relations: ['projet', 'author', 'commentParent' ,'replies', 'replies.author' , 'replies.replies','replies.replies.replies' ] });
     }
 
     public async getReplies(parentId: number): Promise<Comment[]> {

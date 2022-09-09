@@ -12,10 +12,12 @@ import { FileController } from './controller/file.controller';
 import { FileService } from './service/file.service';
 import {SearchService} from './service/search.service';
 import {SearchController} from './controller/search.controller';
+import { ContactController } from './controller/contact.controller';
+import { ContactService } from './service/contact.service';
 
 @Module({
-  controllers: [UserController,CategoryController,ProjetController,CommentController,NoteController, FileController,SearchController],
-  providers: [CategoryService,ProjetService,CommentService,NoteService ,FileService,SearchService],
+  controllers: [UserController,CategoryController,ProjetController,CommentController,NoteController, FileController,SearchController,ContactController],
+  providers: [CategoryService,ProjetService,CommentService,NoteService ,FileService,SearchService, ContactService],
 })
 
 export class AppModule { } 

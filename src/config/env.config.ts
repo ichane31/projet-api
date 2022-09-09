@@ -12,5 +12,9 @@ export const config = {
 	DB_URL: process.env.DATABASE_URL,
 	// SESSION_SECRET: process.env.SESSION_SECRET||'',
 	EMAIL_USERNAME: process.env.EMAIL_USERNAME || 'ichaneapis',
-	EMAIL_PASSWORD: process.env.EMAIL_PASSWORD || 'fVPuptWjGNXE'
+	EMAIL_PASSWORD: process.env.EMAIL_PASSWORD || 'fVPuptWjGNXE',
+	REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET || 'refresh',
+	// GOOGLE_CLIENT_ID : process.env.GOOGLE_CLIENT_ID,
+	// GOOGLE_CLIENT_SECRET :process.env.GOOGLE_CLIENT_SECRET,
+	
 };

@@ -52,26 +52,22 @@ class AdminRouter {
 
 		this.router.get(
 			'/me',
-			decodeUser,
+			ensureAuthenticated,
 			userController.currentUser
 		);
+		
+		this.router.get('/:userId', ensureAuthenticated ,userController.userById)
 
-		this.router.put(
-			'/me',
-			decodeUser,
-			userController.updateCurrentUser
-		);
-
-		this.router.get(
-			'/me/details',
-			decodeUser,
-			userController.details
-		);
-
+		this.router.get('/me/details',ensureAuthenticated, userController.details)
 
 		this.router.post(
 			'/',
 			userController.create
+		);
+
+		this.router.put(
+			'/:userId/setAdmin',
+			userController.setAdmin
 		);
 
 		this.router.get(
@@ -80,33 +76,29 @@ class AdminRouter {
 		);
 
 		this.router.post('/login', ensureNotLoggedIn, userController.login);
-		this.router.post('/logout', decodeUser, userController.logout);
+		this.router.post('/logout', ensureAuthenticated, userController.logout);
 
 		this.router.get('/role/user',
-		decodeUser,
+		    ensureAuthenticated,
 			ensureAccessLevel(Role.ADMIN),
 			userController.getRoleUser);
 
 		this.router.get('/role/admin',
-		decodeUser,
+			ensureAuthenticated,
 			ensureAccessLevel(Role.ADMIN),
 			userController.getRoleAdmin);
 
 		this.router.put('/:userId/promote',
-		      decodeUser,
+			ensureAuthenticated,
 			ensureAccessLevel(Role.ADMIN),
 			userController.promote);
 
 		this.router.put('/:userId/demote',
-			decodeUser,
+			ensureAuthenticated,
 			ensureAccessLevel(Role.ADMIN),
 			userController.demote);
 
-		this.router.get(
-			'/:userId',
-			decodeUser,
-			userController.userById
-		);
+		
 		this.router.delete('/:userId', userController.delete);
 		
 	}

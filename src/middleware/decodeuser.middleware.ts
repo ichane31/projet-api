@@ -21,10 +21,11 @@ export const decodeUser = async (req: Request, res: Response, next: NextFunction
 						config.JWT_SECRET || ''
 					) as unknown as IPayload, refresh: 0
 					};
-					if(!req.currentUser?.userId ) {
-                        throw new UnauthorizedError('Please login ');
-					}
+					// if(!req.currentUser?.userId ) {
+                    //     throw new UnauthorizedError('Please login ');
+					// }
 					let $user = await userService.getById(req.currentUser.userId);
+					
 				    $user.active = new Date();
 					await userService.update($user.id, $user);
 					

@@ -28,6 +28,17 @@ class UserService {
 		return null;
 	}
 
+	public async setOneAdmin(id: number) {
+		let user = await this.userRepository.findOne({where:{id} });
+
+		if (user) {
+			user.role = Role.ADMIN;
+			user.isAdmin = true;
+			return this.update(id, user);
+		}
+		return null;
+	}
+
 	public async update(userId: number, user: User) {
 		return this.userRepository.save({ ...user, id: userId });
 	}
@@ -36,7 +47,7 @@ class UserService {
 	}
 
 	public async getById(id: number): Promise<User | null> {
-		return this.userRepository.findOne({ where: { id } , relations: ['favorites' , 'devices']});
+		return this.userRepository.findOne({ where: { id } , relations: ['favorites' ]});
 	}
 	
 	public async getByIdWithDeepFavoriteBy(id: number): Promise<User | null> {
