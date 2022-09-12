@@ -11,6 +11,6 @@ declare namespace Express {
 			access_token?: string;
 		};
 		files?: any;
-		device?:string;
+		
 	}
 }

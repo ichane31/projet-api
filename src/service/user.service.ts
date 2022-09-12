@@ -75,7 +75,8 @@ class UserService {
 			favorites: undefined,
 			projets: undefined,
 			image: user.image || image,
-			likes: undefined
+			likes: undefined,
+			status :(new Date()).getTime() - user.active.getTime() < 300 * 1000 ? 'online' : 'offline',
 		}
 	}
 }

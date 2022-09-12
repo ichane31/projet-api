@@ -77,13 +77,14 @@ export class UserController {
 	}
 
 	@Get('/joined/month')
-	@ApiOperation({description: 'get a list of recently joined users'})
-	public async getMonthlyJoinedUsers(req: Request, res: Response) {
-		let defaultImage = await fileService.getDefaultImage();
-		res.status(200).json((await (await userService.getAll()).filter(u => {
-			return (new Date()).getTime() - u.createdAt.getTime() < 30*24*60*60*1000;
-		})))
+	@ApiOperation({ description: 'get the list of users joined this monyh' })
+	public async allMonthlyJoinedUsers(req: Request, res: Response) {
+		// let defaultImage = await fileService.getDefaultImage();
+		res.status(200).json((await userService.getAll()).filter(x => {
+			return (new Date()).getTime() - x.createdAt.getTime() < 30*24*60*60*1000;
+		}).map((user) => userService.presente(user , '' , true)));
 	}
+
 
 	@Post('/')
 	@ApiBody({
@@ -118,8 +119,8 @@ export class UserController {
 		await emailService.sendMail(
 			htmlService.createLink(link, 'Verifier votre compte mail'),
 			email,
-			'Confirmer votre inscription à labLib_Projets ');
-		res.status(200).json({ message: "email is sent to you mail account" });
+			'Confirmer votre inscription sur notre plateforme labLib_Projets ');
+		res.status(200).json({ message: "un email vous a éte envoyé  account" });
 	}
 
 	@Get('/verify/:token')
@@ -149,64 +150,7 @@ export class UserController {
 		}
 
 		const newUser = await userService.create(user);
-		res.status(200).send(`<html lang="fr">
-		<head>
-			<meta charset="UTF-8">
-			<meta http-equiv="X-UA-Compatible" content="IE=edge">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<title>Email verify</title>
-			<style>
-				form {align-items:center;
-					margin: 10px;
-				}
-				.divEmail{
-					justify-content:center;
-					align-items: center;
-					position: relative;
-					text-align: center;
-					background:  rgb(209, 218, 195);
-					/* min-width:400px;   */
-					/* max-height:400px; */
-					width: auto;
-					height: auto;
-					margin: 17% ;
-					margin-top: 18%;
-					margin-bottom: 10%;
-					box-shadow: 0 10px 25px rgba(45, 1, 38, 0.2);
-					border-radius: 10px;
-					overflow: hidden;
-				}
-				.email_btn {
-					align-items: center;
-					/* margin-left : 41%; */
-					background-color:rgb(27, 210, 189);
-				}
-				.email_btn a{
-					color:black;
-					text-decoration: none;
-				}
-				h3 {text-align: center;
-				color:rgb(192, 17, 204);}
-		
-			</style>
-		</head>
-		<body>
-			
-			<div class="divEmail bg-gray-500 ">
-				<form class="mt-5 justify-content-center">
-					<h3 class="text-primary">Verification du compte</h3>
-					
-					<p class="text-center mb-4 text-muted">
-					   Votre compte a été verifier avec success , vous pouvez vous connecter maintenant.
-					</p>
-			
-					<button class="btn email_btn bg-success text-black mb-3" > <a className="text-center text-white" href="/Login">Connection</a></button>
-				</form>
-				  
-				</div>
-			
-		</body>
-		</html>`);
+		res.status(200).redirect('https://projet-api-frontend.herokuapp.com/Login');
 	}
 
 	@Get('/resetpassword')
@@ -278,7 +222,7 @@ export class UserController {
 		}
 		user.email = body.email;
 		let updatedUser = userService.update(id, user);
-		res.status(200).json({ message: 'Email updated successfully' }).redirect('');
+		res.status(200).json({ message: 'Email updated successfully' }).redirect('https://projet-api-frontend.herokuapp.com/');
 	}
 
 	@Post('/resetpassword/:token')
@@ -300,7 +244,7 @@ export class UserController {
 		}
 		user.password = await passwordService.hashPassword(password);
 		await userService.update(userId, user);
-		res.status(200).json({ message: "password updated successfully" }).redirect('');
+		res.status(200).json({ message: "password updated successfully" }).redirect('https://projet-api-frontend.herokuapp.com/Login');
 	}
 
 	@Get('/:userId')
@@ -342,21 +286,21 @@ export class UserController {
 		const $token = jwtService.signRefresh({
 			userId: user.id,
 			role: user.role as Role,
-			tokenVersion : 0  
+			v : user.isAdmin ? 1: 0
 	    });
 		
 		
 		
-		// res.cookie("refresh-auth", "Refresh  " + $token, {
-		// 	httpOnly: true,
-		// 	maxAge: 1000 * 60 * 60 * 24 * 7,
-		// 	sameSite: "none",
-		// 	secure: true
-		//  path:'',
-		// });
+		res.cookie("refresh-auth", "Refresh  " + $token, {
+			httpOnly: true,
+			maxAge: 1000 * 60 * 60 * 24 * 7,
+			sameSite: "none",
+			secure: true,
+		    path:'',
+		});
 
-		res.setHeader('x-access-token', 'Bearer ' + token);
-		res.setHeader('authorization', 'Bearer ' + token);
+		// res.setHeader('x-access-token', 'Bearer ' + token);
+		// res.setHeader('authorization', 'Bearer ' + token);
 		
 		
 		user.active = new Date();
@@ -379,13 +323,9 @@ export class UserController {
 	@Post('/logout')
 	@ApiOperation({ description: 'close the session' })
 	public async logout(req: Request, res: Response) {
-		/*req.session.access_token = undefined;
-		res.clearCookie('refresh-auth');*/
-		if (req.headers['authorization']) {
-			let h = req.headers['authorization'];
-			let [type, token] = h.split(' ');
-			
-		}
+		/*req.session.access_token = undefined;*/
+		res.clearCookie('refresh-auth');
+		
 		res.status(200).json();
 	}
 
@@ -467,11 +407,13 @@ export class UserController {
 	})
 	@ApiOperation({ description: 'update information about the current user' })
 	public async updateCurrentUser(req: Request, res: Response) {
-		let { email, firstname, lastname, password, currentPassword } = req.body;
+		let { email, firstname, lastname, password, currentPassword ,country } = req.body;
 		const user = await userService.getById(req.currentUser.userId);
 
 		firstname && (user.firstname = firstname);
 		lastname && (user.lastname = lastname);
+		country && (user.country = country);
+
 
 		if (email || password) {
 			if (!currentPassword) {
@@ -521,6 +463,32 @@ export class UserController {
 		return res.status(200).json(userService.presente(updatedUser , '' , true));
 	}
 
+	@Put('/me/Image')
+	@ApiBody({
+		description: 'Update user profile image',
+	})
+	@ApiOperation({ description: 'update profile image for the current user' })
+	public async updateProfileImage(req: Request, res: Response) {
+		const userId = req.currentUser.userId;
+
+		let user = await userService.getById(userId);
+		if (!user) {
+			throw new NotFoundException('User not found');	
+		}
+
+		if (req.files && req.files.image) {
+			let image = req.files.image;
+			await fileService.delete(user.image);
+			const newImage = new Files();
+			newImage.content = image.data;
+			let $image = await fileService.create(newImage);
+			user.image = $image.id;
+		}
+
+		await userService.update(userId, user);
+		return res.status(200).json({message :'success'})
+	}
+
 	@Delete('/:userId')
 	public async delete(req: Request, res: Response) {
 		const { userId } = req.params;
@@ -535,6 +503,44 @@ export class UserController {
 		return res.status(200).json({});
 	}
 
+	@Delete('/Account/me')
+	@ApiOperation({ description : 'delete my account'})
+	public async deleteMyAccount(req: Request , res: Response) {
+		const userId  = req.currentUser.userId;
+		const {password} = req.body;
+		const user = await userService.getById(userId);
+		if(!user) {
+		    throw new NotFoundException('User not found');
+		}
+
+		if(!password) {
+			throw new BadRequestException('Password is required');	
+		}
+
+		const verifyPassword = await passwordService.comparePassword(password , user.password);
+		if(!verifyPassword) {
+			throw new UnauthorizedError('password incorrect');	
+		}
+
+		await userService.delete(userId);
+
+		return res.status(200).json({message : 'Account successfully deleted.'})
+	}
+
+	@Delete('/me/image')
+	@ApiOperation({ description: 'remove user\'s image' })
+	public async deleteUserProfileImage(req: Request, res: Response) {
+		const userId  = req.currentUser.userId;
+
+		const user = await userService.getById(userId);
+		if (!user)
+			throw new NotFoundException('User not found');
+
+		let image = await fileService.getById(user.image);
+		if (image) await fileService.delete(image.id);
+		user.image = null;
+		return res.status(200).json({message:'Image deleted'});
+	}
 
 	
 	}

@@ -37,9 +37,9 @@ export class User extends BaseEntity {
     active: Date
 
     @Column({
-        default: 0,
+        nullable : true
       })
-    tokenVersion: number;
+    country: string;
 
     @Column({nullable: true})
     facebookId: string;

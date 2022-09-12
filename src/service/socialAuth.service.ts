@@ -12,22 +12,56 @@ export class AuthService {
 
     async google (req , res) {
         if(!req.user) {
-            res.redirect('');
+            res.statue(500).json({ message : `Il n'y a pas d'utilisateur google`}).redirect('');
         }
         const user = req.user;
         const password = user.email + 'google password';
         const userInfo = await userService.getByEmail(user.email);
         if(userInfo) {
             if (userInfo.googleId === null ) {
-                res.status(403);
+                res.status(403).json({ message : `Il ya un utilisateur avec eamail ${user.email} mais ce email n'est pas lié à google.Veuillez vous connecté avec votre email et mot de passe.`});
             }
-            this.googleLogin(res , userInfo ,password)
+            this.Login(res , userInfo ,password)
         } else {
-             this.googleRegister(res , user )
+             this.Register(res , user ,'google')
         }
     }
 
-    async googleLogin(res , user,password) {
+
+    async facebook (req , res) {
+        if(!req.user) {
+            res.statue(500).json({ message : `Il n'y a pas d'utilisateur facebook`}).redirect('');
+        }
+        const user = req.user;
+        const password = user.email + 'facebook password';
+        const userInfo = await userService.getByEmail(user.email);
+        if(userInfo) {
+            if (userInfo.facebookId === null ) {
+                res.status(403).json({ message : `Il ya un utilisateur avec l'email ${user.email} mais ce email n'est pas lié à facebook.Veuillez vous connecté avec votre email et mot de passe.`});
+            }
+            this.Login(res , userInfo ,password)
+        } else {
+             this.Register(res , user ,'facebook')
+        }
+    }
+
+    async twitter (req , res) {
+        if(!req.user) {
+            res.statue(500).json({ message : `Il n'y a pas d'utilisateur twitter`}).redirect('');
+        }
+        const user = req.user;
+        const password = user.email + 'twitter password';
+        const userInfo = await userService.getByEmail(user.email);
+        if(userInfo) {
+            if (userInfo.twitterId === null ) {
+                res.status(403).json({ message : `Il ya un utilisateur avec l'email ${user.email} mais ce email n'est pas lié à twitter.Veuillez vous connecté avec votre email et mot de passe.`});
+            }
+            this.Login(res , userInfo ,password)
+        } else {
+             this.Register(res , user ,'twitter')
+        }
+    }
+    async Login(res , user,password) {
         try {
             const isMatch = await passwordService.comparePassword(password,user.password);
             if(!isMatch) {
@@ -58,18 +92,28 @@ export class AuthService {
         
       }
 
-      async googleRegister(res , user ) {
+      async Register(res , user , type: string) {
         
         const newUser = new User();
         newUser.email = user.email;
         newUser.firstname = user.firstName;
         newUser.lastname = user.lastName;
-        newUser.googleId = user.id;
+        if (type === 'google'){
+            newUser.googleId = user.id;
+            newUser.password = user.email +'google password';
+        } else if (type === 'facebook'){
+            newUser.facebookId = user.id;
+            newUser.password = user.email +'facebook password';
+        } else if (type === 'twitter') {
+            newUser.twitterId = user.id; 
+            newUser.password = user.email +'twitter password';   
+        }
+        
         if (user.picture) {
             const newImage = new Files();
 			newImage.content = user.picture.data;
 			let $image = await fileService.create(newImage);
-			user.image = $image.id;
+			newUser.image = $image.id;
         }
 
         const newCreatedUser = await userService.create(user);
@@ -77,3 +121,4 @@ export class AuthService {
                 user : newCreatedUser});
       }
 }
+export default new AuthService();

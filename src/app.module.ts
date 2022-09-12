@@ -14,10 +14,15 @@ import {SearchService} from './service/search.service';
 import {SearchController} from './controller/search.controller';
 import { ContactController } from './controller/contact.controller';
 import { ContactService } from './service/contact.service';
+import { GoogleStrategy } from './strategy/google.strategy';
+import { FacebookStrategy } from './strategy/facebook.strategy';
+import { TwitterStrategy } from './strategy/twitter.strategy';
+import { AuthService } from './service/socialAuth.service';
+import { SocialAuthController } from './controller/socialAuth.controller';
 
 @Module({
-  controllers: [UserController,CategoryController,ProjetController,CommentController,NoteController, FileController,SearchController,ContactController],
-  providers: [CategoryService,ProjetService,CommentService,NoteService ,FileService,SearchService, ContactService],
+  controllers: [UserController,CategoryController,ProjetController,CommentController,NoteController, FileController,SearchController,ContactController ,/*SocialAuthController*/],
+  providers: [CategoryService,ProjetService,CommentService,NoteService ,FileService,SearchService, ContactService , /*GoogleStrategy , FacebookStrategy , TwitterStrategy , AuthService*/],
 })
 
 export class AppModule { } 

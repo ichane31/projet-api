@@ -24,8 +24,7 @@ import  methodOverride from 'method-override';
 import fileRouter from './route/file.router';
 import sessionService from './service/session.service';
 import { decodeUser } from './middleware/decodeuser.middleware';
-import expressSession from 'express-session';
-import passport from 'passport';
+
 
 export class App {
 
@@ -69,7 +68,7 @@ export class App {
         this._app.use('/api/v1/file' ,fileRouter.router);
         this._app.use('/api/v1/search', searchRouter.router);
 
-        this._app.get('/', (req, res) => res.send('welcome to lablib :) <div> <a href="/api/v1/category">start from here</a> </div>  <div> <a href="/docs">read the documentation</a> </div>'));
+        this._app.get('/', (req, res) => res.send('welcome to lablib_projet apis :) <div> <a href="/api/v1/category">start from here</a> </div>  <div> <a href="/docs">read the documentation</a> </div>'));
     }
 
     private mapMiddleware() {
@@ -92,7 +91,7 @@ export class App {
             }
         }))
         this._app.use(function(req , res , next ) {
-            res.header("Access-control-Allow-Headers" , "Origin, X-Requested-With, Content-Type, Accept ");
+            res.header("Access-control-Allow-Headers" , "Origin, X-Requested-With, Content-Type, Accept,authorization ");
             next();
         });
         
@@ -110,9 +109,7 @@ export class App {
         //     saveUninitialized: true,
         //   }));
 
-        //   this._app.use(passport.initialize());
-
-        //   this._app.use(passport.session());
+    
     }
 
     private notFound(
