@@ -15,7 +15,7 @@ export class Note  extends BaseEntity {
     @UpdateDateColumn()
     updatedAt: Date;
   
-    @ManyToOne(() => Projet, projet => projet.id)
+    @ManyToOne(() => Projet, projet => projet.id , {onDelete: 'CASCADE'})
     projet: Projet;
     
     @ManyToOne(() => User)

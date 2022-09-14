@@ -20,7 +20,7 @@ export class Category extends BaseEntity {
 
     @OneToMany(
         () => Projet,
-        projet => projet.category
+        projet => projet.category 
     )
     projets: Projet[]
 

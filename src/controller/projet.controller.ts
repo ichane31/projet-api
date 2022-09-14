@@ -144,12 +144,12 @@ export class ProjetController {
         const user = await userService.getById(userId);
         if(projet.author === null) {
             projet.author = user;
-            user.projets.push(projet);
+            user.projets?.push(projet);
             await userService.update(userId, user);
         }
         
-        if(! projetService.ensureOwnership(user,projet)) {
-            throw new UnauthorizedException();
+        else if(projet.author.id !== user.id) {
+            throw new UnauthorizedException('ce projet ne vous appartient pas ');
         }
         if(req.files) {
             const {image , resume , rapport , presentation , videoDemo , codeSource} = req.files;

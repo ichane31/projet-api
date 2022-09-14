@@ -71,13 +71,13 @@ export class User extends BaseEntity {
 
 
     @ManyToMany(
-        type => Projet,
+        () => Projet,
         projet => projet.favoritedBy,
       )
       favorites: Projet[];
 
     @ManyToMany(
-        type => Comment,
+        () => Comment,
         comment => comment.likedBy,
       )
       likes: Comment[];

@@ -37,7 +37,7 @@ export class Projet extends BaseEntity {
     @Column({ nullable: true})
     codeSource:string
 
-    @Column()
+    @Column({default:0})
     prix:number
 
     @CreateDateColumn({ type: 'timestamp' })
@@ -47,10 +47,9 @@ export class Projet extends BaseEntity {
     updatedAt: Date
 
   
-
     @ManyToOne(
         () => Category,
-        category => category.projets
+        category => category.projets , {onDelete: 'CASCADE'}
     )
     @JoinColumn({
         name: 'category_id'
@@ -65,7 +64,7 @@ export class Projet extends BaseEntity {
 
     @ManyToOne(
         () => User,
-        user => user.projets
+        user => user.projets , {onDelete: 'CASCADE'}
     )
     @JoinColumn({
         name: 'user_id'

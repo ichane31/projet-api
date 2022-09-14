@@ -16,10 +16,10 @@ export class Comment extends BaseEntity {
     @UpdateDateColumn({ type: 'timestamp' })
     updatedAt: Date
 
-    @ManyToOne(type => Projet, projet => projet.comments)
+    @ManyToOne(() => Projet, projet => projet.comments , {onDelete: 'CASCADE'})
     projet: Projet
 
-    @ManyToOne(() => User ,user =>user.comments ) 
+    @ManyToOne(() => User ,user =>user.comments , {onDelete: 'CASCADE'} ) 
     @JoinColumn({ name: 'user_id'})
     author: User;
 
@@ -32,7 +32,7 @@ export class Comment extends BaseEntity {
     replies: Comment[]
 
     @ManyToMany(
-        type => User,
+        () => User,
         user => user.likes,
         { eager: true },
       )
