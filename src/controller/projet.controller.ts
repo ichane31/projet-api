@@ -43,7 +43,7 @@ export class ProjetController {
     @Post('/')
     public async createProjet(req: Request, res: Response) {
         const {title, description,prix , category} = req.body;
-        // const {userId} = req.body
+        const userId = req.currentUser.userId;
         if (!category || !title) {
             throw new BadRequestException('Missing required fields');
         }
@@ -64,14 +64,21 @@ export class ProjetController {
         proj.codeSource = await fileService.saveFile("code" , codeSource);
 
         }
+        const user = await userService.getById(userId);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
 
 
         proj.title = title;
         proj.description = description;
         proj.prix = prix;
         proj.category = $category;
+        proj.author = user;
 
-        const newProjet = await projetService.createProj(proj/*,userEmail*/);
+        const newProjet = await projetService.createProj(proj);
+        user.projets?.push(newProjet);
+        await userService.update(userId, user);
         let defaultImage = await fileService.getDefaultImage();
         res.status(201).json({ ...newProjet, category: proj.category.name , comments:0, notes: 0, image: proj.image || defaultImage});
 
@@ -137,6 +144,8 @@ export class ProjetController {
         const user = await userService.getById(userId);
         if(projet.author === null) {
             projet.author = user;
+            user.projets.push(projet);
+            await userService.update(userId, user);
         }
         
         if(! projetService.ensureOwnership(user,projet)) {
@@ -196,7 +205,7 @@ export class ProjetController {
     @Delete('/:projetId')
     public async deleteProjet(req: Request, res: Response) {
         const { projetId } = req.params;
-        // const {userId} = req.currentUser.userId;
+        const userId = req.currentUser.userId;
 
         const projet = await projetService.getById(Number(projetId));
 
@@ -206,12 +215,11 @@ export class ProjetController {
 
         await fileService.deleteFiles(projet);
         
-        // const user = await userService.getById(userId);
-        // if(! projetService.ensureOwnership(user,projet)) {
-        //     throw new UnauthorizedException();
-        // }
+        const user = await userService.getById(userId);
+        if(! projetService.ensureOwnership(user,projet)) {
+            throw new UnauthorizedException();
+        }
 
-        
 
         await projetService.deleteProjetById(projet.id);
 
@@ -271,7 +279,7 @@ export class ProjetController {
   })
   @Get('/:userId/count')
   async getCountByUser(req: Request , res: Response) {
-      const userId = Number(req.params.userId);
+      const userId = req.currentUser.userId;
   
     const user = await userService.getById(userId);
     if (!user) {

@@ -66,8 +66,9 @@ export class CommentController {
         comment.author = $user;
         comment.body = body;
         comment.projet = $projet;
-        $projet.comments.push(comment);
-        await projetService.update(Number(projetId),$projet);
+        $user.comments?.push(comment);
+        await userService.update(userId , $user);
+        
         const newComment = await commentService.createComment(comment);
 
         res.status(201).json({ ...newComment, projet: comment.projet.id , author: comment.author.firstname});
@@ -113,6 +114,8 @@ export class CommentController {
         const user = await userService.getById(userId);
         if(comment.author === null) {
             comment.author = user;
+            user.comments?.push(comment)
+            await userService.update(userId, user);
         }
 
         if(comment.author.id !== userId ) {
@@ -151,8 +154,8 @@ export class CommentController {
 
         await commentService.deleteCommentById(comment.id);
 
-        user.comments =  user.comments.filter(c => c.id !== Number(commentId));
-        comment.projet.comments = comment.projet.comments.filter(c => c.id !== comment.id);
+        user.comments =  user.comments?.filter(c => c.id !== Number(commentId));
+        comment.projet.comments = comment.projet.comments?.filter(c => c.id !== comment.id);
         await userService.update(userId , user);
         await projetService.update(comment.projet.id, comment.projet)
         return res.status(200).json({});
@@ -313,11 +316,11 @@ export class CommentController {
         if(comment.likedBy.filter(com => com.id === userId).length >0) {
             return res.status(400).json({msg:'Comment already liked'});
           }
-        user.likes.push(comment);
-        comment.likedBy.push(user);
-        await commentService.updateComment(Number(commentId),comment);
+        user.likes?.push(comment);
+        comment.likedBy?.push(user);
+        const updateComment= await commentService.updateComment(Number(commentId),comment);
         await userService.update(userId , user);
-        return res.status(200).json({});
+        return res.status(200).json({...updateComment});
     }
 
     @ApiOperation({ description: 'Remove a comment from likes.' })
@@ -342,8 +345,8 @@ export class CommentController {
         if(comment.likedBy.filter(com => com.id === userId).length ===0) {
             return res.status(400).json({msg:'Comment has not yet been liked'});
           }
-        user.likes = user.likes.filter(like => like.id !== comment.id);
-        comment.likedBy = comment.likedBy.filter(lik => lik.id !== user.id);
+        user.likes = user.likes?.filter(like => like.id !== comment.id);
+        comment.likedBy = comment.likedBy?.filter(lik => lik.id !== user.id);
         await userService.update(userId, user);
         await commentService.updateComment(Number(commentId) , comment);
         return res.status(200).json({});

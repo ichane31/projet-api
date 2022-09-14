@@ -46,12 +46,12 @@ export class NoteController {
         newNote.projet = $projet;
         const addNote = await noteService.createNote(newNote);
 
-        $projet.notes.push(addNote);
-        $user.notes.push(addNote);
+        $projet.notes?.push(addNote);
+        $user.notes?.push(addNote);
 
         await projetService.update(Number(projetId) ,$projet);
         await userService.update(userId, $user);
-        res.status(201).json({ ...addNote, projet: newNote.projet.title });
+        res.status(201).json({ ...addNote, projet: newNote.projet.id });
     }
 
     @ApiOperation({ description: 'Get details of a note' })
@@ -80,6 +80,9 @@ export class NoteController {
         const { note} = req.body;
         const userId = req.currentUser.userId;
         const { noteId } = req.params;
+        if(!note) {
+            throw new BadRequestException('Missing required fields')
+        }
         const noteGet = await noteService.getById(Number(noteId));
 
         if (!noteGet) {
@@ -89,7 +92,7 @@ export class NoteController {
         const $user = await userService.getById(userId);
         if(noteGet.user === null) {
             noteGet.user = $user;
-            $user.notes.push(noteGet);
+            $user.notes?.push(noteGet);
             await userService.update(userId, $user);
         }
 
@@ -133,7 +136,7 @@ export class NoteController {
         }
 
         await noteService.deleteNoteById(note.id);
-        $user.notes = $user.notes.filter(n => n.id !== note.id);
+        $user.notes = $user.notes?.filter(n => n.id !== note.id);
 
         return res.status(200).json({});
     }
