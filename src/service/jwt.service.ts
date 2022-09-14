@@ -13,7 +13,7 @@ class JwtService {
 
 	public sign(payload: IPayload): string {
 		return jwt.sign(payload, config.JWT_SECRET!, {
-			expiresIn : '30min'
+			expiresIn : '1d'
 		});
 	}
 
