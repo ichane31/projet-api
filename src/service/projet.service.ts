@@ -87,28 +87,34 @@ export class ProjetService {
         return { message: 'Deleted successfully !' }
     }
     
-    public async getByCategory(categoryId: number , page = 1, take = 25): Promise<Projet[]> {
-        return this.projetRepository.createQueryBuilder()
-            .leftJoinAndSelect("Projet.category", "Category")
-            .leftJoinAndSelect('Projet.comments','Comment')
-            .leftJoinAndSelect("Projet.notes","Note")
-            .leftJoinAndSelect("Projet.author","User")
-            .where("Category.id = :categoryId", { categoryId })
-            .skip((page - 1) * take)
-            .take(take)
-            .orderBy('Projet.createdAt','DESC')
-            .getMany();
-    }
+    // public async getByCategory(categoryId: number , page = 1, take = 25): Promise<Projet[]> {
+    //     return this.projetRepository.createQueryBuilder()
+    //         .leftJoinAndSelect("Projet.category", "Category")
+    //         .leftJoinAndSelect('Projet.comments','Comment')
+    //         .leftJoinAndSelect("Projet.notes","Note")
+    //         .leftJoinAndSelect("Projet.author","User")
+    //         .where("Category.id = :categoryId", { categoryId })
+    //         .skip((page - 1) * take)
+    //         .take(take)
+    //         .orderBy('Projet.createdAt','DESC')
+    //         .getMany();
+    // }
 
-    public async getProjetByUser(userId: number , page = 1, take = 25): Promise<Projet[]> {
-        return this.projetRepository.createQueryBuilder()
-            .innerJoinAndSelect("Projet.user", "User")
-            .leftJoinAndSelect('Projet.comments','Comment')
-            .leftJoinAndSelect('Projet.notes','Note')
-            .leftJoinAndSelect('Projet.category','Category')
-            .where("User.id = :userId", { userId })
-            .orderBy('createdAt','DESC')
-            .getMany();
+    public async getByCategory(categoryId: number , page = 1, take = 25): Promise<Projet[]> {
+      return (await this.getAllProjet()).filter(x => x.category?.id === categoryId);
+  }
+
+    public async getProjetByUser(userId: number ): Promise<Projet[]> {
+        // return this.projetRepository.createQueryBuilder()
+        //     .innerJoinAndSelect("Projet.user", "User")
+        //     .leftJoinAndSelect('Projet.comments','Comment')
+        //     .leftJoinAndSelect('Projet.notes','Note')
+        //     .leftJoinAndSelect('Projet.category','Category')
+        //     .where("User.id = :userId", { userId })
+        //     .orderBy('createdAt','DESC')
+        //     .getMany();
+
+        return (await this.getAllProjet()).filter(x => x.author?.id === userId);
     }
 
     public async favoriteProjet(

@@ -228,7 +228,7 @@ export class CategoryController {
         }
 
         let projets = await projetService.getByCategory(Number(categoryId));
-        res.status(200).json(projets.map(((projet) => ({ ...projet, category: projet.category.name , comments:projet.commentCount , notes: projet.notes.length}))));
+        res.status(200).json(projets.map(((projet) => ({ ...projet, category: projet.category.name , comments:projet.commentCount , notes: projet.notes.length , favoritedBy : projet.favoritedBy}))));
     }
 
   
