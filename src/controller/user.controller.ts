@@ -193,7 +193,7 @@ export class UserController {
 			throw new NotFoundException('User not found');
 		}
 		
-		res.status(200).redirect(`http://localhost:3001/${token}/reserPassword`);
+		res.status(200).redirect(`http://localhost:3001/${token}/resetPassword`);
 	}
 
 	@Get('/changeemail/:token')
