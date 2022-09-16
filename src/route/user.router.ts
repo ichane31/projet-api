@@ -31,7 +31,7 @@ class AdminRouter {
 			userController.allJoinedUsers
 		);
 
-		this.router.get(
+		this.router.post(
 			'/resetpassword',
 			userController.resetPassword
 		);

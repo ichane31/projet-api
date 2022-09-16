@@ -22,6 +22,7 @@ import { PutUserDTO } from '../dto/put.user.dto';
 import { LoginDTO } from '../dto/login.dto';
 import { IEmail } from '../types/email.interface';
 import { UnauthorizedError } from '../error/UnauthorizedError.error';
+import { PasswordLinkDTO } from '../dto/get.passwordlink.dto';
 
 @ApiTags('User')
 @Controller('api/v1/user')
@@ -153,21 +154,26 @@ export class UserController {
 		res.status(200).redirect('https://projet-api-frontend.herokuapp.com/Login');
 	}
 
-	@Get('/resetpassword')
+	@Post('/resetpassword')
+	@ApiBody({
+		type: PasswordLinkDTO,
+		description: 'Send reset password link'	
+	})
 	@ApiOperation({ description: 'request a reset password link to be sent to your mailbox' })
 	public async resetPassword(req: Request, res: Response) {
-		const { email } = req.body;
-		if (!email) throw new BadRequestException('Invalid email address :' + email);
+		const {email}  = req.body;
+		if (! email) throw new BadRequestException('Invalid email address :' + email);
+		console.log(email)
 		const user = await userService.getByEmail(email);
 		if (!user) {
 			throw new NotFoundException('User not found');
 		}
 		let link = config.origin + 'api/v1/user/resetpassword/' + jwtService.signPassword({ userId: user.id, key: user.password } as IPasswordPayload);
 		emailService.sendMail(
-			htmlService.createLink(link, 'click to reset your password'),
+			htmlService.createLink(link, 'clicker pour reinitialiser votre mot de passe '),
 			user.email,
-			'Reset Your LabLib-projets Password');
-		return res.status(200).json({ message: 'email sent to you mailbox' });
+			'Reinitialiser votre mot de passe  ');
+		return res.status(200).json({ message: 'Un email vou a été envoyé' });
 	}
 
 	@Get('/resetpassword/:token')
