@@ -193,21 +193,7 @@ export class UserController {
 			throw new NotFoundException('User not found');
 		}
 		
-		res.status(200).send(`<html lang="fr">
-		<head>
-			<meta charset="UTF-8">
-			<meta http-equiv="X-UA-Compatible" content="IE=edge">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<title> Reinitialiser le mot de passe </title>
-		</head>
-		<body>
-			<form method="post" action="./${token}">
-				<input type="password" name="password" placeholder="Entrer votre nouveau mot de passe " required>
-				<input type="password" name="confirm" placeholder="Re-entrer votre nouveau mot de passe" required>
-				<input type="submit" value="Confirm" />
-			</form>
-		</body>
-		</html>`);
+		res.status(200).redirect(`http://localhost:3001/${token}/reserPassword`);
 	}
 
 	@Get('/changeemail/:token')
