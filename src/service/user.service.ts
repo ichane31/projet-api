@@ -47,7 +47,7 @@ class UserService {
 	}
 
 	public async getById(id: number): Promise<User | null> {
-		return this.userRepository.findOne({ where: { id } , relations: ['favorites' ]});
+		return this.userRepository.findOne({ where: { id } , relations: ['favorites' , 'favorites.author']});
 	}
 	
 	public async getByIdWithDeepFavoriteBy(id: number): Promise<User | null> {
