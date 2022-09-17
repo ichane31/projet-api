@@ -30,6 +30,7 @@ class AdminRouter {
 			'/joined',
 			userController.allJoinedUsers
 		);
+		this.router.get('/joined/month' ,userController.allMonthlyJoinedUsers)
 
 		this.router.post(
 			'/resetpassword',
@@ -56,7 +57,7 @@ class AdminRouter {
 			userController.currentUser
 		);
 		
-		this.router.get('/:userId', ensureAuthenticated ,userController.userById)
+		this.router.get('/:userId' ,userController.userById)
 
 		this.router.get('/me/details',ensureAuthenticated, userController.details)
 
@@ -100,6 +101,8 @@ class AdminRouter {
 
 		
 		this.router.delete('/:userId', userController.delete);
+		this.router.put('/me/password' , ensureAuthenticated , userController.updateUserPassword)
+		this.router.delete('/Account/me' , ensureAuthenticated , userController.deleteMyAccount);
 		
 	}
 }

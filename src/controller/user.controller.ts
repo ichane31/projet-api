@@ -193,7 +193,7 @@ export class UserController {
 			throw new NotFoundException('User not found');
 		}
 		
-		res.status(200).redirect(`http://localhost:3001/${token}/resetPassword`);
+		res.status(200).redirect(`https://projet-api-frontend.herokuapp.com/${token}/resetPassword`);
 	}
 
 	@Get('/changeemail/:token')
@@ -243,8 +243,9 @@ export class UserController {
 	@ApiOperation({ description: 'get information about a specific user' })
 	public async userById(req: Request, res: Response) {
 		const userId = Number(req.params.userId);
-		res.status(200).json({ ...await userService.getById(userId), password: undefined, favorites: undefined });
+		res.status(200).json({ ...await userService.getById(userId), password: undefined });
 	}
+	
 
 	@Post('/login')
 	@ApiBody({
@@ -399,7 +400,7 @@ export class UserController {
 	})
 	@ApiOperation({ description: 'update information about the current user' })
 	public async updateCurrentUser(req: Request, res: Response) {
-		let { email, firstname, lastname, password, currentPassword ,country } = req.body;
+		let { email, firstname, lastname ,country } = req.body;
 		const user = await userService.getById(req.currentUser.userId);
 
 		firstname && (user.firstname = firstname);
@@ -407,16 +408,7 @@ export class UserController {
 		country && (user.country = country);
 
 
-		if (email || password) {
-			if (!currentPassword) {
-				throw new BadRequestException ('current password must be provided');
-			}
-			let isPasswordValid = await passwordService.comparePassword(currentPassword , user.password);
-
-			if(!isPasswordValid) {
-				throw new BadRequestException('Invalid password');
-			}
-
+		if (email ) {
 			if(email && user.email !=email) {
 				email = email.toLowerCase();
 				if(!/^[\w\-\.]+@[\w\-]+\.[\.a-z]+$/.test(email.trim().toLowerCase())) {
@@ -432,13 +424,7 @@ export class UserController {
 					id : user.id ,
 					email
 				});
-				emailService.sendMail(htmlService.createLink(config.origin 	+ 'api/v1/user/changeemail/' + token , 'change your email address') , email , 'Change password for your lablib-projets account');
-			}
-
-			if(password) {
-				if (password.length < 8 || /^[\w]+$/.test(password))
-					throw new BadRequestException(`password must be at least 8 characters long with one special character at least`);
-				user.password = await passwordService.hashPassword(password);
+				emailService.sendMail(htmlService.createLink(config.origin 	+ 'api/v1/user/changeemail/' + token , 'change your email address') , email , 'Change email for your lablib-projets account');
 			}
 		}
 
@@ -453,6 +439,32 @@ export class UserController {
 
 		const updatedUser = await userService.update(req.currentUser.userId, user);
 		return res.status(200).json(userService.presente(updatedUser , '' , true));
+	}
+
+	@Put('/me/password')
+	@ApiBody({ description:'Change user password'})
+	@ApiOperation({ description: 'Update user password' })
+	public async updateUserPassword(req: Request, res: Response) {
+		let {currentPassword , password} = req.body;
+		const user = await userService.getById(req.currentUser.userId);
+		if(password) {
+			if (!currentPassword) {
+				throw new BadRequestException('veuillez saisir le mot de passe actuel');
+			}
+			let isPasswordValid = await passwordService.comparePassword(currentPassword , user.password);
+
+			if(!isPasswordValid) {
+				throw new BadRequestException('Invalid password');
+			}
+		}
+		if(password) {
+			if (password.length < 8 || /^[\w]+$/.test(password))
+				throw new BadRequestException(`password must be at least 8 characters long with one special character at least`);
+			user.password = await passwordService.hashPassword(password);
+		}
+
+		const updatedUser = await userService.update(req.currentUser.userId, user);
+		res.status(200).json({ message: 'Email updated successfully' }).redirect('https://projet-api-frontend.herokuapp.com/Login')
 	}
 
 	@Put('/me/Image')

@@ -419,7 +419,7 @@ public async getFavoriteProjets(req: Request, res: Response) {
         throw new NotFoundException('Invalid user');
     }
     const projets = (user.favorites || []).slice(0 ,Number(count));
-    res.status(200).json(projets.map(projet => { return {...projet,category: projet.category.name, comments: projet.commentCount, notes: projet.notes.length }}));
+    res.status(200).json(projets.map(projet => { return {...projet,category: projet.category?.name, comments: projet.commentCount, notes: projet.notes?.length }}));
 }
 
 @ApiOperation({ description: 'Get a list of favorites projets' })
@@ -432,7 +432,7 @@ public async getAllFavoriteProjets(req: Request, res: Response) {
         throw new NotFoundException('Invalid user');
     }
     const projets = user.favorites ;
-    res.status(200).json(projets.map(projet => { return {...projet,category: projet.category.name, comments: projet.commentCount, notes: projet.notes.length }}));
+    res.status(200).json(projets.map(projet => { return {...projet,category: projet.category?.name, comments: projet.commentCount, notes: projet.notes?.length }}));
 }
 
 @ApiOperation({ description: 'Get a list of recommendations for a projet' })
