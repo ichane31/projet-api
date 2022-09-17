@@ -309,7 +309,7 @@ export class UserController {
 		}catch (err) {
             
 		}
-		res.status(200).json({ ...user, password: undefined, favorites: undefined, likes: undefined, token  ,$token, exp});
+		res.status(200).json({ ...user, password: undefined, favoritesNbre: user.favorites?.length, likes: undefined, token  ,$token, exp});
 		
 	}
 
