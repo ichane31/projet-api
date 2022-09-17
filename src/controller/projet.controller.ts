@@ -423,10 +423,11 @@ public async getFavoriteProjets(req: Request, res: Response) {
 }
 
 @ApiOperation({ description: 'Get a list of favorites projets' })
-@Get('/favorites')
+@Get('/user/favorites')
 public async getAllFavoriteProjets(req: Request, res: Response) {
     
-    let  userId  = req.currentUser.userId;
+    const  userId  =  req.currentUser.userId;
+    
     let user = await userService.getById(userId);
     if (!user) {
         throw new NotFoundException('Invalid user');

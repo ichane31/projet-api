@@ -24,7 +24,7 @@ class ProjetRouter {
         this.router.get('/:userId/count', projetController.getCountByUser);
         this.router.get('/:userId/list',ensureAuthenticated, projetController.allProjetsByUser);
         this.router.get('/favorites/:count' , ensureAuthenticated , projetController.getFavoriteProjets);
-        this.router.get('/favorites', ensureAuthenticated , projetController.getAllFavoriteProjets)
+        this.router.get('/user/favorites', ensureAuthenticated , projetController.getAllFavoriteProjets)
         this.router.post('/:projetId/favorite' , ensureAuthenticated , projetController.favoriteProjet);
         this.router.delete('/:projetId/unfavorite' , ensureAuthenticated , projetController.unfavoriteProjet)
     }
