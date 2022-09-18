@@ -4,9 +4,7 @@ export const valideFile = (type: string,fileMineType: string , fileSize : number
     let allowedMimeType= {image : [
         'image/png','image/jpg','image/jpeg'
     ] ,
-    resume : ['application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.oasis.opendocument.text',
-            'text/plain'] ,
+    resume : ['application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'] ,
 
     rapport :['application/pdf','application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -42,7 +40,7 @@ export const valideFile = (type: string,fileMineType: string , fileSize : number
 
 export const Errormessage = (type : string) =>{
     const msg = { image : "please choose a png , jpg , jpeg file and check that it does not exceed 1 Mb" ,
-    resume :"please choose a doc ,docx , odt , txt file and check that it does not exceed 20 Mb " ,
+    resume :"please choose a doc ,docx ,  file and check that it does not exceed 20 Mb " ,
     rapport :"please choose a pdf , doc ,docx  file and check that it does not exceed 60 Mb ",
     presentation: "please choose a ppt ,pptx file and check that it does not exceed 60 Mb",
     video:"please choose a avi , mpeg, ogv ,mp4 file and check that it does not exceed 100 Mb",
