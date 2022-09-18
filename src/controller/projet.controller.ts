@@ -153,14 +153,23 @@ export class ProjetController {
         }
         if(req.files) {
             const {image , resume , rapport , presentation , videoDemo , codeSource} = req.files;
-            await fileService.deleteFiles(projet);
-            projet.image = await fileService.saveFile("image" , image);
-            projet.resume = await fileService.saveFile("resume" , resume);
-            projet.rapport = await fileService.saveFile("rapport" , rapport);
-            projet.presentation = await fileService.saveFile("presentation" , presentation);
-            projet.videoDemo = await fileService.saveFile("video" , videoDemo);
-            projet.codeSource = await fileService.saveFile("code" , codeSource);
-
+            if(image && resume && rapport && presentation && videoDemo && codeSource) {
+                await fileService.deleteFiles(projet);
+                projet.image = await fileService.saveFile("image" , image);
+                projet.resume = await fileService.saveFile("resume" , resume);
+                projet.rapport = await fileService.saveFile("rapport" , rapport);
+                projet.presentation = await fileService.saveFile("presentation" , presentation);
+                projet.videoDemo = await fileService.saveFile("video" , videoDemo);
+                projet.codeSource = await fileService.saveFile("code" , codeSource);
+            }
+                projet.image = await fileService.saveFile("image" , image);
+                projet.resume = await fileService.saveFile("resume" , resume);
+                projet.rapport = await fileService.saveFile("rapport" , rapport);
+                projet.presentation = await fileService.saveFile("presentation" , presentation);
+                projet.videoDemo = await fileService.saveFile("video" , videoDemo);
+                projet.codeSource = await fileService.saveFile("code" , codeSource);
+            
+            
         }
         if (typeof category !== 'undefined') {
             let $category = await categoryService.getByName(category);
