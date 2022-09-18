@@ -307,17 +307,17 @@ export class ProjetController {
           }
       }
   )
-  @Get('/:userId/list')
+  @Get('/user/Projetlist')
   public async allProjetsByUser(req: Request, res: Response) {
-      const { userId} = req.params;
-      const user = await userService.getById(Number(userId));
+      const userId = req.currentUser.userId;
+      const user = await userService.getById(userId);
 
       if (!user) {
           throw new NotFoundException('User not found');
       }
 
       let projets = await projetService.getProjetByUser(Number(userId));
-      res.status(200).json(projets.map(((projet) => ({ ...projet, user: projet.author.firstname,
+      res.status(200).json(projets.map(((projet) => ({ ...projet,
          comments: projet.commentCount, notes:projet.notes.length }))));
   }
 

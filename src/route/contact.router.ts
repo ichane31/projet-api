@@ -1,8 +1,8 @@
 import { Router } from "express";
 import contactController from "../controller/contact.controller";
-import {ensureAuthenticated} from '../middleware/ensureAuthenticated.middleware';
 
-class NoteRouter {
+
+class ContactRouter {
     public router: Router;
 
     constructor() {
@@ -11,12 +11,11 @@ class NoteRouter {
     }
 
     private routes() {
-        this.router.post('/', ensureAuthenticated, contactController.createContact);
+        this.router.post('/', contactController.createContact);
         this.router.get('/', contactController.allContacts);
-        this.router.delete('/:contactId',ensureAuthenticated, contactController.deleteContact);
-        this.router.get('/listQuestion', ensureAuthenticated ,contactController.getContactByUser);
+        this.router.delete('/:contactId', contactController.deleteContact);
     }
 
 }
 
-export default new NoteRouter();
+export default new ContactRouter();

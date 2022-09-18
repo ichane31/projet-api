@@ -23,14 +23,5 @@ export class Contact extends BaseEntity {
 
     @UpdateDateColumn()
     updatedAt: Date;
-
-    @ManyToOne(
-        () => User,
-        user => user.contacts
-    )
-    @JoinColumn({
-        name: 'user_id'
-    })
-    user: User
     
 }

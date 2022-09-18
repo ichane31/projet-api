@@ -101,7 +101,8 @@ class AdminRouter {
 
 		
 		this.router.delete('/:userId', userController.delete);
-		this.router.put('/me/password' , ensureAuthenticated , userController.updateUserPassword)
+		this.router.put('/me/password' , ensureAuthenticated , userController.updateUserPassword);
+		this.router.put('/me' , ensureAuthenticated , userController.updateCurrentUser);
 		this.router.delete('/Account/me' , ensureAuthenticated , userController.deleteMyAccount);
 		
 	}

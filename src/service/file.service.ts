@@ -44,10 +44,11 @@ export class FileService {
          if(! valideFile(type, file.mimetype, file.size)) {
             throw new UnauthorizedError(Errormessage(type));
          }
+        
          
          const newFile =  new Files();
          newFile.content = file.data;
-         newFile.original_name = file.originalname;
+         newFile.original_name = file.name;
          let addFile =await this.create(newFile);
          return ( addFile).id;
          

@@ -22,7 +22,7 @@ class ProjetRouter {
         this.router.get('/count', projetController.Count);
         this.router.get('/:categoryId/count', projetController.getCountByCategory);
         this.router.get('/:userId/count', projetController.getCountByUser);
-        this.router.get('/:userId/list',ensureAuthenticated, projetController.allProjetsByUser);
+        this.router.get('/user/Projetlist',ensureAuthenticated, projetController.allProjetsByUser);
         this.router.get('/favorites/:count' , ensureAuthenticated , projetController.getFavoriteProjets);
         this.router.get('/user/favorites', ensureAuthenticated , projetController.getAllFavoriteProjets)
         this.router.post('/:projetId/favorite' , ensureAuthenticated , projetController.favoriteProjet);

@@ -18,12 +18,13 @@ export class SearchController {
     @Post('/')
     public async getResults(req: Request, res: Response) {
         const { search } = req.body;
-
-        const categories = (await searchService.getCategories(search.text)).map((category) => ({ ...category, projets: category.projets.length }));
-        const projets = (await searchService.getProjets(search.text)).map((projet) => ({ ...projet, comments: projet.commentCount ,notes: projet.notes.length }));
+    
+        const categories = (await searchService.getCategories(search)).map((category) => ({ ...category, projets: category.projets.length }));
+        const projets = (await searchService.getProjets(search)).map((projet) => ({ ...projet, comments: projet.commentCount ,notes: projet.notes.length }));
 
         res.status(200).json({ categories, projets, input: search.text });
     }
+    
     @ApiOperation({ description: 'Get list of entities that match the given search query' })
     @ApiOkResponse({
         description: 'List of the selected entities',
@@ -47,7 +48,7 @@ export class SearchController {
     @Post('/category')
     public async getCategories(req: Request, res: Response) {
         const { search } = req.body;
-        const categories = await searchService.getCategories(search.text);
+        const categories = await searchService.getCategories(search);
         res.status(200).json(categories.map((category) => ({ ...category, projets: category.projets.length })));
     }
 
@@ -59,7 +60,7 @@ export class SearchController {
     @Post('/projet')
     public async getProjets(req: Request, res: Response) {
         const { search } = req.body;
-        const projets = await searchService.getProjets(search.text);
+        const projets = await searchService.getProjets(search);
         res.status(200).json(projets.map((projet) => ({ ...projet, comments: projet.commentCount , notes:projet.notes.length })));
     }
 

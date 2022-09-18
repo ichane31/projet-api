@@ -82,12 +82,6 @@ export class User extends BaseEntity {
       )
       likes: Comment[];
 
-    @OneToMany(
-        () => Contact,
-        contact => contact.user
-    )
-    contacts: Contact[]
-
 
     @CreateDateColumn()
     createdAt: Date;

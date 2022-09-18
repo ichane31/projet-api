@@ -24,6 +24,7 @@ import  methodOverride from 'method-override';
 import fileRouter from './route/file.router';
 import sessionService from './service/session.service';
 import { decodeUser } from './middleware/decodeuser.middleware';
+import contactRouter from './route/contact.router';
 
 
 export class App {
@@ -67,6 +68,7 @@ export class App {
         this._app.use('/api/v1/note', noteRouter.router);
         this._app.use('/api/v1/file' ,fileRouter.router);
         this._app.use('/api/v1/search', searchRouter.router);
+        this._app.use('/api/v1/contact', contactRouter.router);
 
         this._app.get('/', (req, res) => res.send('welcome to lablib_projet apis :) <div> <a href="/api/v1/category">start from here</a> </div>  <div> <a href="/docs">read the documentation</a> </div>'));
     }

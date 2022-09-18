@@ -31,7 +31,7 @@ export class FileController {
     @Get('/:uuid/original_name')
     public async getFileOriginal_Name(req: Request, res: Response) {
         const { uuid } = req.params;
-        let file = await fileService.getById(uuid);
+        const file = await fileService.getById(uuid);
         if (!file) {
             throw new NotFoundException('file not found');
         }

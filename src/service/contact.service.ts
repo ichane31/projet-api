@@ -17,14 +17,8 @@ export class ContactService {
 	}
 
     public async getAll(): Promise<Contact[]> {
-		return this.contactRepository.find({
-			relations: ['user']
-		});
+		return this.contactRepository.find();
 	}
-
-    public async getContacts(userId : number) : Promise<Contact[]> {
-        return (await this.getAll()).filter(x => x.user?.id === userId);
-    }
 
     public async  create(contact: Contact): Promise<Contact> {
         let save: Promise<Contact>;
@@ -37,8 +31,7 @@ export class ContactService {
     }
 
 	public async getById(id: number): Promise<Contact | null> {
-        return this.contactRepository.findOne( { where: { id }, 
-            relations:['user']},
+        return this.contactRepository.findOne( { where: { id }},
             );
     }
 

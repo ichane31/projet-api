@@ -8,7 +8,7 @@ import projetService from './projet.service';
 export class SearchService {
 
     private matcher(query: string): RegExp {
-        const input2matcher = '[\\w\\W]*' + query.replace(/[\W]+/g, '').split('').map(x => x + '[\\w\\W]*').join('');
+        const input2matcher = '[\\w\\W]*' + query?.replace(/[\W]+/g, '').split('').map(x => x + '[\\w\\W]*').join('');
         return new RegExp(input2matcher, 'gi');
     }
     public async getCategories(query: string): Promise<Category[]> {

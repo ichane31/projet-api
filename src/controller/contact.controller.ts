@@ -26,30 +26,29 @@ export class ContactController {
     })
     @Get('/')
     public async allContacts(req: Request, res: Response) {
-        res.status(200).json((await contactService.getAll()).map((contact) => ({ ...contact , user: contact.user.id})));
+        res.status(200).json((await contactService.getAll()).map((contact) => ({ ...contact })));
     }
 
 
-    @ApiOperation({ description: 'Get a list of comments for a given projet' })
-    @ApiResponse({
-        status: 404,
-        description: 'Projet not found',
-    })
-    @Get('/listQuestion')
-    public async getContactByUser(req: Request, res: Response) {
-        const  userId  = req.currentUser.userId;
-        const user = await userService.getById(userId);
+    // @ApiOperation({ description: 'Get a list of comments for a given projet' })
+    // @ApiResponse({
+    //     status: 404,
+    //     description: 'Projet not found',
+    // })
+    // @Get('/listQuestion')
+    // public async getContactByUser(req: Request, res: Response) {
+    //     const  userId  = req.currentUser.userId;
+    //     const user = await userService.getById(userId);
 
-        if (!user)
-            throw new NotFoundException('User not found');
+    //     if (!user)
+    //         throw new NotFoundException('User not found');
 
-        let contacts = await contactService.getContacts(userId);
-        res.status(200).json(contacts.map(c => {return {
-            ...c,
-            user: c.user.id,
-            
-        }}));
-    }
+    //     let contacts = await contactService.getContacts(userId);
+    //     res.status(200).json(contacts.map(c => {return {
+    //         ...c,
+           
+    //     }}));
+    // }
 
 
     @ApiOperation({ description: 'Create a new contat' })
@@ -73,7 +72,7 @@ export class ContactController {
     @Post('/')
     public async createContact(req: Request, res: Response) {
         const { name,  email , subject , message } = req.body;
-        const {userId } = req.currentUser;
+        
         if (!name || !email || !subject || !message) {
             throw new BadRequestException('Missing required fields');
         }
@@ -82,10 +81,6 @@ export class ContactController {
 			throw new BadRequestException(`email ${email} must be a valid email address`);
 		}
 
-        const user = await userService.getById(userId);
-        if(!user) {
-            throw new NotFoundException('user does not exist');
-        }
 
         await emailService.sendMailQuestion(email , subject, message);
 
@@ -95,12 +90,10 @@ export class ContactController {
         contact.email = email; 
         contact.subject = subject;
         contact.message = message;
-        contact.user = user;
         const newContact = await contactService.create(contact);
 
-        user.contacts.push(newContact);
-        await userService.update(userId, user);
-        res.status(200).json({ ...newContact , info: "Votre message a éte envoyé avec success" });
+
+        res.status(200).json({ message: "Votre message a éte envoyé avec success" });
     }
 
     @ApiOperation({ description: 'Remove a comment from likes.' })
@@ -110,12 +103,7 @@ export class ContactController {
     })
     @Delete('/:contactId')
     public async deleteContact(req: Request, res: Response) {
-        const { contactId } = req.params;
-        const userId  = req.currentUser.userId;
-        let user = await userService.getById(userId);
-        if (!user) {
-            throw new NotFoundException('user not found');
-        }
+        const {contactId} = req.params;
 
         const contact = await contactService.getById(Number(contactId));
 
@@ -125,9 +113,7 @@ export class ContactController {
         }
 
         await contactService.delete(contact.id);
-        user.contacts = user.contacts.filter(c => c.id !== contact.id);
         
-        await userService.update(userId, user);
        
         return res.status(200).json({});
     }
