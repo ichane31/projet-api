@@ -17,8 +17,8 @@ export const valideFile = (type: string,fileMineType: string , fileSize : number
     
     video : ['video/x-msvideo','video/mpeg','video/ogg','video/mp4'] , 
 
-    code : [  'application/zip',
-            'application/vnd.rar',]};
+    code : [  'application/zip','application/octet-stream','application/x-zip-compressed','multipart/x-zip',
+            'application/vnd.rar','application/x-rar-compressed']};
 
 
     let maxSize = {image : MB,resume :20*MB,rapport : 60*MB ,
